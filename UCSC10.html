@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIRESCENE – Enhanced Wildfire Risk Assessment</title>
+  <style>
+    /* ==============================
+       ENHANCED GLOBAL STYLES
+    ============================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ==============================
+       ENHANCED HEADER
+    ============================== */
+    header {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffcc02 100%);
+      color: #fff;
+      padding: 15px 25px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    header .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    header .logo-group img {
+      height: 45px;
+      width: auto;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    header .app-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      letter-spacing: -0.025em;
+    }
+
+    header .lang-selector {
+      color: #2d3748;
+      background: rgba(255,255,255,0.95);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    header .lang-selector:hover {
+      background: rgba(255,255,255,1);
+      transform: translateY(-1px);
+    }
+
+    /* ==============================
+       ENHANCED MAIN CONTAINER
+    ============================== */
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 25px;
+      flex: 1;
+      height: calc(100vh - 200px); /* Fixed height for proper display */
+    }
+
+    /* ==============================
+       ENHANCED INPUT PANEL
+    ============================== */
+    .inputs {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      max-height: 100%;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e0 transparent;
+    }
+
+    .inputs::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .inputs::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .inputs::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 3px;
+    }
+
+    .section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 15px;
+      border-left: 4px solid;
+      transition: all 0.3s ease;
+    }
+
+    .section:nth-child(1) { border-left-color: #e53e3e; }
+    .section:nth-child(2) { border-left-color: #dd6b20; }
+    .section:nth-child(3) { border-left-color: #3182ce; }
+
+    .section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .section h2 {
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section h2::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ==============================
+       ENHANCED SLIDER CONTROLS
+    ============================== */
+    .slider-group {
+      margin-bottom: 20px;
+      position: relative;
+      padding: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .slider-group:hover {
+      background: rgba(255,255,255,0.9);
+      transform: translateX(2px);
+    }
+
+    .slider-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #2d3748;
+      font-size: 0.9rem;
+    }
+
+    .slider-group input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #e2e8f0, #cbd5e0);
+      outline: none;
+      cursor: pointer;
+      margin: 8px 0;
+      -webkit-appearance: none;
+      transition: all 0.3s ease;
+    }
+
+    .slider-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .slider-group input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .slider-group input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .slider-group .slider-value {
+      text-align: right;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-top: 4px;
+      padding: 4px 8px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 6px;
+      display: inline-block;
+      min-width: 55px;
+    }
+
+    /* ==============================
+       ENHANCED DROPDOWN CONTROLS
+    ============================== */
+    .dropdown-group {
+      margin-bottom: 20px;
+      padding: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .dropdown-group:hover {
+      background: rgba(255,255,255,0.9);
+      transform: translateX(2px);
+    }
+
+    .dropdown-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #2d3748;
+      font-size: 0.9rem;
+    }
+
+    .dropdown-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      color: #2d3748;
+    }
+
+    .dropdown-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .dropdown-group select:hover {
+      border-color: #cbd5e0;
+    }
+
+    /* ==============================
+       ENHANCED TOOLTIPS
+    ============================== */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 300px;
+      background: linear-gradient(135deg, #2d3748, #4a5568);
+      color: #fff;
+      text-align: left;
+      border-radius: 12px;
+      padding: 15px;
+      position: absolute;
+      z-index: 1000;
+      bottom: 130%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+      white-space: pre-line;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -8px;
+      border-width: 8px;
+      border-style: solid;
+      border-color: #2d3748 transparent transparent transparent;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(-5px);
+    }
+
+    /* ==============================
+       ENHANCED OUTPUT PANEL
+    ============================== */
+    .output-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .bar-container {
+      flex: 1;
+      min-height: 0;
+      padding: 15px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bar-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.8);
+    }
+
+    .bar-container h3 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2d3748;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .bar-container h3:hover {
+      color: #667eea;
+      transform: translateX(2px);
+    }
+
+    .bar-track {
+      position: relative;
+      width: 100%;
+      height: 25px;
+      background: linear-gradient(to right, #f7fafc, #edf2f7);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 6px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      border-radius: 12px;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .bar-label {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+
+    .bar-marker {
+      position: relative;
+      width: 100%;
+      height: 15px;
+      margin-top: -1px;
+    }
+
+    .marker {
+      position: absolute;
+      font-size: 1.2rem;
+      line-height: 0;
+      color: #2d3748;
+      transform: translateX(-50%);
+      user-select: none;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    }
+
+    /* ==============================
+       ENHANCED COLOR SCHEMES
+    ============================== */
+    /* Danger Classes */
+    .danger-class-1 {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+    .danger-class-2 {
+      background: linear-gradient(135deg, #ecc94b, #d69e2e);
+      box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
+    }
+    .danger-class-3 {
+      background: linear-gradient(135deg, #ed8936, #dd6b20);
+      box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+    }
+    .danger-class-4 {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    }
+    .danger-class-5 {
+      background: linear-gradient(135deg, #9c1a1c, #742a2a);
+      box-shadow: 0 4px 15px rgba(156, 26, 28, 0.3);
+    }
+
+    /* Exposure Classes */
+    .expclass-1 {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+    .expclass-2 {
+      background: linear-gradient(135deg, #ecc94b, #d69e2e);
+      box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
+    }
+    .expclass-3 {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    }
+
+    /* Vulnerability Classes */
+    .vulnclass-1 {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+    .vulnclass-2 {
+      background: linear-gradient(135deg, #ecc94b, #d69e2e);
+      box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
+    }
+    .vulnclass-3 {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    }
+
+    /* New Classes (Ignition & Propagation) */
+    .newclass-1 {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+    .newclass-2 {
+      background: linear-gradient(135deg, #ecc94b, #d69e2e);
+      box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
+    }
+    .newclass-3 {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    }
+
+    /* Combined Risk Classes */
+    .riskclass-1 {
+      background: linear-gradient(135deg, #3182ce, #2c5282);
+      box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+    }
+    .riskclass-2 {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+    .riskclass-3 {
+      background: linear-gradient(135deg, #ecc94b, #d69e2e);
+      box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
+    }
+    .riskclass-4 {
+      background: linear-gradient(135deg, #ed8936, #dd6b20);
+      box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+    }
+    .riskclass-5 {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    }
+
+    /* ==============================
+       ENHANCED FOOTER
+    ============================== */
+    footer {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border-top: 3px solid #e53e3e;
+      padding: 15px 25px;
+      margin-top: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    footer .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 0.85rem;
+    }
+
+    footer .footer-logos {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    footer .footer-logos img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      transition: all 0.3s ease;
+    }
+
+    footer .footer-logos img:hover {
+      transform: scale(1.05);
+    }
+
+    footer .footer-content a {
+      color: #e53e3e;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    footer .footer-content a:hover {
+      color: #c53030;
+      text-decoration: underline;
+    }
+
+    /* ==============================
+       WEIGHT CONTROL STYLING
+    ============================== */
+    .weight-control {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .weight-control label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      color: #4a5568;
+    }
+
+    .weight-control input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: linear-gradient(to right, #e2e8f0, #cbd5e0);
+      border-radius: 2px;
+    }
+
+    .weight-control input[type="range"]::-webkit-slider-thumb {
+      width: 12px;
+      height: 12px;
+      background: #667eea;
+      border-radius: 50%;
+    }
+
+    .weight-control span {
+      min-width: 30px;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    /* ==============================
+       RESPONSIVE DESIGN
+    ============================== */
+    @media (max-width: 1200px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        height: auto;
+      }
+
+      .output-container {
+        height: auto;
+        max-height: 70vh;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px auto;
+        padding: 0 15px;
+      }
+
+      .inputs, .output-container {
+        padding: 15px;
+        border-radius: 15px;
+      }
+
+      .section {
+        padding: 12px;
+        margin-bottom: 15px;
+      }
+
+      header .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      header .app-title {
+        font-size: 1.4rem;
+        text-align: center;
+      }
+    }
+
+    /* ==============================
+       ANIMATION ENHANCEMENTS
+    ============================== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .bar-container {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .bar-container:nth-child(1) { animation-delay: 0.1s; }
+    .bar-container:nth-child(2) { animation-delay: 0.2s; }
+    .bar-container:nth-child(3) { animation-delay: 0.3s; }
+    .bar-container:nth-child(4) { animation-delay: 0.4s; }
+    .bar-container:nth-child(5) { animation-delay: 0.5s; }
+    .bar-container:nth-child(6) { animation-delay: 0.6s; }
+
+    /* ==============================
+       ACCESSIBILITY IMPROVEMENTS
+    ============================== */
+    *:focus {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    .slider-group input[type="range"]:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Custom modal styles */
+    .custom-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      backdrop-filter: blur(5px);
+      font-family: 'Inter', sans-serif;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
+</head>
+<body>
+ 
+<header>
+    <div class="header-content">
+      <div class="logo-group">
+        <img src="fire-scene_logo.png" alt="Firescene Logo"> <div class="app-title" id="appTitle">Enhanced Wildfire Risk Assessment</div>
+      </div>
+      <select id="langSelect" class="lang-selector">
+        <option value="el">Ελληνικά</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+      </select>
+    </div>
+</header>
+
+  <div class="container">
+
+    <div class="inputs">
+
+      <div class="section">
+        <h2 id="secDangerTitle">🔥 Παράγοντες Κινδύνου</h2>
+
+        <div class="slider-group tooltip">
+          <label for="slope" id="lblSlope">Κλίση Εδάφους: <span id="slope-value">0°</span></label>
+          <input type="range" id="slope" min="0" max="60" step="1" value="0">
+          <span class="tooltiptext" id="slope-tooltip">
+Κλάση 1: Χαμηλός κίνδυνος (≤ 5°)
+Κλάση 2: Μέτριος (5°–15°)
+Κλάση 3: Υψηλός (15°–30°)
+Κλάση 4: Πολύ Υψηλός (30°–45°)
+Κλάση 5: Ακραίος (> 45°)
+          </span>
+        </div>
+
+        <div class="dropdown-group tooltip">
+          <label for="aspect" id="lblAspect">Προσανατολισμός Κλίσης:</label>
+          <select id="aspect"></select>
+          <span class="tooltiptext" id="aspect-tooltip">
+Κλάση 1: Βόρεια - Χαμηλός κίνδυνος
+Κλάση 2: Ανατολικά/Δυτικά - Μέτριος
+Κλάση 3: Νότια - Υψηλός κίνδυνος
+          </span>
+        </div>
+
+        <div class="dropdown-group tooltip">
+          <label for="fuel" id="lblFuel">Τύπος & Φορτίο Καυσίμων:</label>
+          <select id="fuel"></select>
+          <span class="tooltiptext" id="fuel-tooltip">
+Κλάση 1: Αραιά γρασίδια/φυλλοβόλα
+Κλάση 2: Μικτά θαμνώδη
+Κλάση 3: Πυκνά θαμνώδη
+Κλάση 4: Κωνοφόρα δάση
+Κλάση 5: Βαριά συσσώρευση καυσίμων
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="moisture" id="lblMoisture">Υγρασία Λεπτών Καυσίμων (%): <span id="moisture-value">30%</span></label>
+          <input type="range" id="moisture" min="0" max="100" step="1" value="30">
+          <span class="tooltiptext" id="moisture-tooltip">
+Κλάση 1: Πολύ Υψηλή (> 25%)
+Κλάση 2: Υψηλή (15%–25%)
+Κλάση 3: Μέτρια (8%–15%)
+Κλάση 4: Χαμηλή (4%–8%)
+Κλάση 5: Κρίσιμη (< 4%)
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="elevation" id="lblElevation">Υψόμετρο (m): <span id="elevation-value">500 m</span></label>
+          <input type="range" id="elevation" min="0" max="1500" step="10" value="500">
+          <span class="tooltiptext" id="elevation-tooltip">
+Κλάση 1: Χαμηλό υψόμετρο (0–500 m)
+Κλάση 2: Μέσο υψόμετρο (500–1000 m)
+Κλάση 3: Υψηλό υψόμετρο (1000–1500 m)
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="windspeed" id="lblWindspeed">Ταχύτητα Ανέμου (km/h): <span id="windspeed-value">10 km/h</span></label>
+          <input type="range" id="windspeed" min="0" max="80" step="1" value="10">
+          <span class="tooltiptext" id="windspeed-tooltip">
+Κλάση 1: Ήρεμος (< 10 km/h)
+Κλάση 2: Ελαφρύς άνεμος (10–20 km/h)
+Κλάση 3: Μέτριος άνεμος (20–35 km/h)
+Κλάση 4: Δυνατός άνεμος (35–50 km/h)
+Κλάση 5: Ακραίος άνεμος (> 50 km/h)
+          </span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 id="secExposureTitle">🏘️ Παράγοντες Έκθεσης</h2>
+
+        <div class="slider-group tooltip">
+          <label for="bld-density" id="lblBldDensity">Πυκνότητα Κτηρίων (/km²): <span id="bld-density-value">0</span></label>
+          <input type="range" id="bld-density" min="0" max="2000" step="10" value="0">
+          <span class="tooltiptext" id="bld-tooltip">
+Κλάση 1: Πολύ Υψηλή (> 1000/km²)
+Κλάση 2: Υψηλή (500–1000/km²)
+Κλάση 3: Μέτρια (200–500/km²)
+Κλάση 4: Χαμηλή (< 200/km²)
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="pop-density" id="lblPopDensity">Πυκνότητα Πληθυσμού (άτομα/km²): <span id="pop-density-value">0</span></label>
+          <input type="range" id="pop-density" min="0" max="5000" step="50" value="0">
+          <span class="tooltiptext" id="pop-tooltip">
+Κλάση 1: Πολύ Υψηλή (> 2000/km²)
+Κλάση 2: Υψηλή (1000–2000/km²)
+Κλάση 3: Μέτρια (300–1000/km²)
+Κλάση 4: Χαμηλή (< 300/km²)
+          </span>
+        </div>
+
+        <div class="dropdown-group tooltip">
+          <label for="infrastructure" id="lblInfrastructure">Απειλούμενες Χρήσεις:</label>
+          <select id="infrastructure"></select>
+          <span class="tooltiptext" id="infrastructure-tooltip">
+Κλάση 1: Γεωργική χρήση (0-20%)
+Κλάση 2: Βιομηχανική χρήση (20-40%)
+Κλάση 3: Δημόσιες & Εμπορικές χρήσεις (40-60%)
+Κλάση 4: Νοσοκομεία, Σχολεία, Ξενοδοχεία, Γηροκομεία (100%)
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="dist-settlement" id="lblDistSettlement">Απόσταση από Οικισμό (m): <span id="dist-settlement-value">0 m</span></label>
+          <input type="range" id="dist-settlement" min="0" max="2000" step="50" value="0">
+          <span class="tooltiptext" id="sett-tooltip">
+Κλάση 1: Πολύ Κοντά (< 100 m)
+Κλάση 2: Κοντά (100–300 m)
+Κλάση 3: Μέτρια (300–1000 m)
+Κλάση 4: Μακριά (> 1000 m)
+          </span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 id="secVulnTitle">🛡️ Παράγοντες Τρωτότητας</h2>
+
+        <div class="dropdown-group tooltip">
+          <label for="emergency-response" id="lblEmergencyResponse">Ικανότητα Αντίδρασης:</label>
+          <select id="emergency-response"></select>
+          <span class="tooltiptext" id="emergency-tooltip">
+Κλάση 1: Άριστη (< 15 λεπτά αντίδρασης)
+Κλάση 2: Καλή (15–30 λεπτά)
+Κλάση 3: Μέτρια (30–45 λεπτά)
+Κλάση 4: Κακή (> 45 λεπτά)
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="road-access" id="lblRoadAccess">Προσβασιμότητα Οδικού Δικτύου (0-10): <span id="road-access-value">5</span></label>
+          <input type="range" id="road-access" min="0" max="10" step="0.5" value="5">
+          <span class="tooltiptext" id="roadaccess-tooltip">
+Κλάση 1: Άριστη πρόσβαση (> 8)
+Κλάση 2: Καλή πρόσβαση (6–8)
+Κλάση 3: Μέτρια πρόσβαση (4–6)
+Κλάση 4: Κακή πρόσβαση (< 4)
+          </span>
+        </div>
+
+        <div class="dropdown-group tooltip">
+          <label for="struc-quality" id="lblStruc">Ποιότητα Κατασκευών:</label>
+          <select id="struc-quality"></select>
+          <span class="tooltiptext" id="struc-tooltip">
+Κλάση 1: Πυροανθεκτικά υλικά, αμυντικός χώρος
+Κλάση 2: Τυπική κατασκευή, κάποια προστασία
+Κλάση 3: Μικτή ποιότητα κατασκευής
+Κλάση 4: Ευάλωτη κατασκευή, χωρίς προστασία
+          </span>
+        </div>
+
+        <div class="dropdown-group tooltip">
+          <label for="water-supply" id="lblWaterSupply">Υδροληψία και Δίκτυο:</label>
+          <select id="water-supply"></select>
+          <span class="tooltiptext" id="water-tooltip">
+Κλάση 1: Επαρκείς κρουνοί, υψηλή πίεση
+Κλάση 2: Περιορισμένοι κρουνοί, επαρκής πίεση
+Κλάση 3: Λίγοι κρουνοί, μεταβλητή πίεση
+Κλάση 4: Χωρίς κρουνούς, ανεπαρκής παροχή
+          </span>
+        </div>
+
+        <div class="slider-group tooltip">
+          <label for="socio-vuln" id="lblSocio">Δείκτης Κοινωνικο-οικονομικής Τρωτότητας (%): <span id="socio-vuln-value">0%</span></label>
+          <input type="range" id="socio-vuln" min="0" max="100" step="1" value="0">
+          <span class="tooltiptext" id="socio-vuln-tooltip">
+Κλάση 1: Χαμηλή τρωτότητα (< 25%)
+Κλάση 2: Μέτρια τρωτότητα (25%–50%)
+Κλάση 3: Υψηλή τρωτότητα (50%–75%)
+Κλάση 4: Πολύ υψηλή τρωτότητα (> 75%)
+          </span>
+        </div>
+      </div>
+
+    </div> <div class="output-container">
+
+      <div class="bar-container">
+        <h3 id="danger-title">🔥📊 Δείκτης Κινδύνου Πυρκαγιάς</h3>
+        <div class="bar-track">
+          <div id="danger-fill" class="bar-fill danger-class-1"></div>
+          <span id="danger-label" class="bar-label">0%</span>
+        </div>
+        <div class="bar-marker"><span id="danger-marker" class="marker">▲</span></div>
+        <div class="weight-control">
+          <label><span id="weight-label-1">Βάρος:</span> <input type="range" id="hazard-weight" min="0" max="100" value="25" step="0.5"> <span id="hazard-weight-val">25.0%</span></label>
+        </div>
+      </div>
+
+      <div class="bar-container">
+        <h3 id="exposure-title">🏘️📊 Δείκτης Έκθεσης</h3>
+        <div class="bar-track">
+          <div id="exposure-fill" class="bar-fill expclass-1"></div>
+          <span id="exposure-label" class="bar-label">0%</span>
+        </div>
+        <div class="bar-marker"><span id="exposure-marker" class="marker">▲</span></div>
+        <div class="weight-control">
+          <label><span id="weight-label-2">Βάρος:</span> <input type="range" id="exposure-weight" min="0" max="100" value="25" step="0.5"> <span id="exposure-weight-val">25.0%</span></label>
+        </div>
+      </div>
+
+      <div class="bar-container">
+        <h3 id="vulnerability-title">🛡️📊 Δείκτης Τρωτότητας</h3>
+        <div class="bar-track">
+          <div id="vulnerability-fill" class="bar-fill vulnclass-1"></div>
+          <span id="vulnerability-label" class="bar-label">0%</span>
+        </div>
+        <div class="bar-marker"><span id="vulnerability-marker" class="marker">▲</span></div>
+        <div class="weight-control">
+          <label><span id="weight-label-3">Βάρος:</span> <input type="range" id="vulnerability-weight" min="0" max="100" value="25" step="0.5"> <span id="vulnerability-weight-val">25.0%</span></label>
+        </div>
+      </div>
+
+      <div class="bar-container">
+        <h3 id="ignition-title">⚡📊 Πιθανότητα Ανάφλεξης</h3>
+        <div class="bar-track">
+          <div id="ignition-fill" class="bar-fill newclass-1"></div>
+          <span id="ignition-label" class="bar-label">0%</span>
+        </div>
+        <div class="bar-marker"><span id="ignition-marker" class="marker">▲</span></div>
+        <div class="weight-control">
+          <label><span id="weight-label-4">Βάρος:</span> <input type="range" id="ignition-weight" min="0" max="100" value="12.5" step="0.5"> <span id="ignition-weight-val">12.5%</span></label>
+        </div>
+      </div>
+
+      <div class="bar-container">
+        <h3 id="propagation-title">🌋📊 Δυναμικό Εξάπλωσης Πυρκαγιάς</h3>
+        <div class="bar-track">
+          <div id="propagation-fill" class="bar-fill newclass-1"></div>
+          <span id="propagation-label" class="bar-label">0%</span>
+        </div>
+        <div class="bar-marker"><span id="propagation-marker" class="marker">▲</span></div>
+        <div class="weight-control">
+          <label><span id="weight-label-5">Βάρος:</span> <input type="range" id="propagation-weight" min="0" max="100" value="12.5" step="0.5"> <span id="propagation-weight-val">12.5%</span></label>
+        </div>
+      </div>
+
+      <div class="bar-container">
+        <h3 id="risk-title">⚠️📊 Ολοκληρωμένος Δείκτης Κινδύνου</h3>
+        <div class="bar-track">
+          <div id="risk-fill" class="bar-fill riskclass-1"></div>
+          <span id="risk-label" class="bar-label">0%</span>
+        </div>
+        <div class="bar-marker"><span id="risk-marker" class="marker">▲</span></div>
+      </div>
+
+    </div> </div> <footer>
+    <div class="footer-content">
+      <div class="footer-logos">
+        <img src="eu_flag_funding.png" alt="EU Flag Funding">
+        <img src="firescene_partners_logos.jpg" alt="Disaster Resilience">
+      </div>
+      <div>
+        <a href="https://civil-protection-knowledge-network.europa.eu/projects/fire-scene" target="_blank">
+          DG ECHO-UCPKN: Firescene project
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /**********************************************
+     * 1) ENHANCED DOM REFERENCES
+    **********************************************/
+    const langSelect = document.getElementById('langSelect');
+    const appTitle = document.getElementById('appTitle');
+
+    // Section titles & labels
+    const secDangerTitle = document.getElementById('secDangerTitle');
+    const lblSlope = document.getElementById('lblSlope');
+    const lblAspect = document.getElementById('lblAspect');
+    const lblFuel = document.getElementById('lblFuel');
+    const lblMoisture = document.getElementById('lblMoisture');
+    const lblElevation = document.getElementById('lblElevation');
+    const lblWindspeed = document.getElementById('lblWindspeed');
+
+    const secExposureTitle = document.getElementById('secExposureTitle');
+    const lblBldDensity = document.getElementById('lblBldDensity');
+    const lblPopDensity = document.getElementById('lblPopDensity');
+    const lblInfrastructure = document.getElementById('lblInfrastructure');
+    const lblDistSettlement = document.getElementById('lblDistSettlement');
+
+    const secVulnTitle = document.getElementById('secVulnTitle');
+    const lblEmergencyResponse = document.getElementById('lblEmergencyResponse');
+    const lblRoadAccess = document.getElementById('lblRoadAccess');
+    const lblStruc = document.getElementById('lblStruc');
+    const lblWaterSupply = document.getElementById('lblWaterSupply');
+    const lblSocio = document.getElementById('lblSocio');
+
+    // Enhanced sliders & dropdowns
+    const slopeSlider = document.getElementById('slope');
+    const moistureSlider = document.getElementById('moisture');
+    const elevSlider = document.getElementById('elevation');
+    const windSlider = document.getElementById('windspeed');
+    const bldSlider = document.getElementById('bld-density');
+    const popSlider = document.getElementById('pop-density');
+    const dsSettSlider = document.getElementById('dist-settlement');
+    const roadAccessSlider = document.getElementById('road-access');
+    const aspectSelect = document.getElementById('aspect');
+    const fuelSelect = document.getElementById('fuel');
+    const infrastructureSelect = document.getElementById('infrastructure');
+    const emergencySelect = document.getElementById('emergency-response');
+    const strucSelect = document.getElementById('struc-quality');
+    const waterSelect = document.getElementById('water-supply');
+    const socioVulnSlider = document.getElementById('socio-vuln');
+
+    // Weight control sliders
+    const hazardWeightSlider = document.getElementById('hazard-weight');
+    const exposureWeightSlider = document.getElementById('exposure-weight');
+    const vulnWeightSlider = document.getElementById('vulnerability-weight');
+    const ignitionWeightSlider = document.getElementById('ignition-weight');
+    const propagationWeightSlider = document.getElementById('propagation-weight');
+
+    // Display values
+    let slopeVal = document.getElementById('slope-value');
+    let moistureVal = document.getElementById('moisture-value');
+    let elevVal = document.getElementById('elevation-value');
+    let windVal = document.getElementById('windspeed-value');
+    let bldVal = document.getElementById('bld-density-value');
+    let popVal = document.getElementById('pop-density-value');
+    let dsSettVal = document.getElementById('dist-settlement-value');
+    let roadAccessVal = document.getElementById('road-access-value');
+    let socioVulnVal = document.getElementById('socio-vuln-value');
+
+    // Weight display values
+    let hazardWeightVal = document.getElementById('hazard-weight-val');
+    let exposureWeightVal = document.getElementById('exposure-weight-val');
+    let vulnWeightVal = document.getElementById('vulnerability-weight-val');
+    let ignitionWeightVal = document.getElementById('ignition-weight-val');
+    let propagationWeightVal = document.getElementById('propagation-weight-val');
+
+    // Output bars & labels
+    const dangerFill = document.getElementById('danger-fill');
+    const dangerLabel = document.getElementById('danger-label');
+    const dangerMarker = document.getElementById('danger-marker');
+    const exposureFill = document.getElementById('exposure-fill');
+    const exposureLabel = document.getElementById('exposure-label');
+    const exposureMarker = document.getElementById('exposure-marker');
+    const vulnFill = document.getElementById('vulnerability-fill');
+    const vulnLabel = document.getElementById('vulnerability-label');
+    const vulnMarker = document.getElementById('vulnerability-marker');
+    const ignitionFill = document.getElementById('ignition-fill');
+    const ignitionLabel = document.getElementById('ignition-label');
+    const ignitionMarker = document.getElementById('ignition-marker');
+    const propagationFill = document.getElementById('propagation-fill');
+    const propagationLabel = document.getElementById('propagation-label');
+    const propagationMarker = document.getElementById('propagation-marker');
+    const riskFill = document.getElementById('risk-fill');
+    const riskLabel = document.getElementById('risk-label');
+    const riskMarker = document.getElementById('risk-marker');
+
+    /**********************************************
+     * 2) ENHANCED MULTI-LANGUAGE TRANSLATIONS
+    **********************************************/
+    const translations = {
+      el: {
+        appTitle: "Βελτιωμένη Εκτίμηση Κινδύνου Δασικών Πυρκαγιών",
+        secDangerTitle: "🔥 Παράγοντες Κινδύνου",
+        lblSlope: "Κλίση Εδάφους:",
+        lblAspect: "Προσανατολισμός Κλίσης:",
+        lblFuel: "Τύπος & Φορτίο Καυσίμων:",
+        lblMoisture: "Υγρασία Λεπτών Καυσίμων (%):",
+        lblElevation: "Υψόμετρο (m):",
+        lblWindspeed: "Ταχύτητα Ανέμου (km/h):",
+        secExposureTitle: "🏘️ Παράγοντες Έκθεσης",
+        lblBldDensity: "Πυκνότητα Κτηρίων (/km²):",
+        lblPopDensity: "Πυκνότητα Πληθυσμού (άτομα/km²):",
+        lblInfrastructure: "Απειλούμενες Χρήσεις:",
+        lblDistSettlement: "Απόσταση από Οικισμό (m):",
+        secVulnTitle: "🛡️ Παράγοντες Τρωτότητας",
+        lblEmergencyResponse: "Ικανότητα Αντίδρασης:",
+        lblRoadAccess: "Προσβασιμότητα Οδικού Δικτύου (0-10):",
+        lblStruc: "Ποιότητα Κατασκευών:",
+        lblWaterSupply: "Υδροληψία και Δίκτυο:",
+        lblSocio: "Δείκτης Κοινωνικο-οικονομικής Τρωτότητας (%):",
+        dangerTitle: "🔥📊 Δείκτης Κινδύνου Πυρκαγιάς",
+        exposureTitle: "🏘️📊 Δείκτης Έκθεσης",
+        vulnTitle: "🛡️📊 Δείκτης Τρωτότητας",
+        ignitionTitle: "⚡📊 Πιθανότητα Ανάφλεξης",
+        propagationTitle: "🌋📊 Δυναμικό Εξάπλωσης Πυρκαγιάς",
+        riskTitle: "⚠️📊 Ολοκληρωμένος Δείκτης Κινδύνου",
+        infoTitle: "Πληροφορίες",
+        weightLabel: "Βάρος:",
+
+        aspectOpts: [
+          "Βόρεια (Κλάση 1)",
+          "Ανατολικά/Δυτικά (Κλάση 2)",
+          "Νότια (Κλάση 3)"
+        ],
+        fuelOpts: [
+          "Πόες/Πλατύφυλλα (Κλάση 1)",
+          "Αραιοί θάμνοι & φρύγανα (Κλάση 2)",
+          "Πυκνοί θάμνοι (Κλάση 3)",
+          "Κωνοφόρα/Υψηλοί θάμνοι (Κλάση 4)",
+          "Συγκέντρωση/βαριά καύσιμα (Κλάση 5)"
+        ],
+        infrastructureOpts: [
+          "Γεωργική χρήση (Κλάση 1)",
+          "Βιομηχανική χρήση (Κλάση 2)",
+          "Δημόσιες και Εμπορικές χρήσεις (Κλάση 3)",
+          "Νοσοκομεία, Σχολεία, Ξενοδοχεία, γηροκομεία (Κλάση 4)"
+        ],
+        emergencyOpts: [
+          "Άριστη (< 15 λεπτά) (Κλάση 1)",
+          "Καλή (15–30 λεπτά) (Κλάση 2)",
+          "Μέτρια (30–45 λεπτά) (Κλάση 3)",
+          "Κακή (> 45 λεπτά) (Κλάση 4)"
+        ],
+        strucOpts: [
+          "Πυροανθεκτικά υλικά, αμυντικός χώρος (Κλάση 1)",
+          "Τυπική κατασκευή, κάποια προστασία (Κλάση 2)",
+          "Μικτή ποιότητα κατασκευής (Κλάση 3)",
+          "Ευάλωτη κατασκευή, χωρίς προστασία (Κλάση 4)"
+        ],
+        waterOpts: [
+          "Επαρκείς κρουνοί, υψηλή πίεση (Κλάση 1)",
+          "Περιορισμένοι κρουνοί, επαρκής πίεση (Κλάση 2)",
+          "Λίγοι κρουνοί, μεταβλητή πίεση (Κλάση 3)",
+          "Χωρίς κρουνούς, ανεπαρκής παροχή (Κλάση 4)"
+        ],
+
+        // Tooltips
+        slopeTooltip: "Κλάση 1: Χαμηλός κίνδυνος (≤ 5°)\nΚλάση 2: Μέτριος (5°–15°)\nΚλάση 3: Υψηλός (15°–30°)\nΚλάση 4: Πολύ Υψηλός (30°–45°)\nΚλάση 5: Ακραίος (> 45°)",
+        aspectTooltip: "Κλάση 1: Βόρεια - Χαμηλός κίνδυνος\nΚλάση 2: Ανατολικά/Δυτικά - Μέτριος\nΚλάση 3: Νότια - Υψηλός κίνδυνος",
+        fuelTooltip: "Κλάση 1: Αραιά γρασίδια/φυλλοβόλα\nΚλάση 2: Μικτά θαμνώδη\nΚλάση 3: Πυκνά θαμνώδη\nΚλάση 4: Κωνοφόρα δάση\nΚλάση 5: Βαριά συσσώρευση καυσίμων",
+        moistureTooltip: "Κλάση 1: Πολύ Υψηλή (> 25%)\nΚλάση 2: Υψηλή (15%–25%)\nΚλάση 3: Μέτρια (8%–15%)\nΚλάση 4: Χαμηλή (4%–8%)\nΚλάση 5: Κρίσιμη (< 4%)",
+        elevationTooltip: "Κλάση 1: Χαμηλό υψόμετρο (0–500 m)\nΚλάση 2: Μέσο υψόμετρο (500–1000 m)\nΚλάση 3: Υψηλό υψόμετρο (1000–1500 m)",
+        windTooltip: "Κλάση 1: Ήρεμος (< 10 km/h)\nΚλάση 2: Ελαφρύς άνεμος (10–20 km/h)\nΚλάση 3: Μέτριος άνεμος (20–35 km/h)\nΚλάση 4: Δυνατός άνεμος (35–50 km/h)\nΚλάση 5: Ακραίος άνεμος (> 50 km/h)",
+        bldTooltip: "Κλάση 1: Πολύ Υψηλή (> 1000/km²)\nΚλάση 2: Υψηλή (500–1000/km²)\nΚλάση 3: Μέτρια (200–500/km²)\nΚλάση 4: Χαμηλή (< 200/km²)",
+        popTooltip: "Κλάση 1: Πολύ Υψηλή (> 2000/km²)\nΚλάση 2: Υψηλή (1000–2000/km²)\nΚλάση 3: Μέτρια (300–1000/km²)\nΚλάση 4: Χαμηλή (< 300/km²)",
+        infrastructureTooltip: "Κλάση 1: Γεωργική χρήση (0-20%)\nΚλάση 2: Βιομηχανική χρήση (20-40%)\nΚλάση 3: Δημόσιες & Εμπορικές χρήσεις (40-60%)\nΚλάση 4: Νοσοκομεία, Σχολεία, Ξενοδοχεία, Γηροκομεία (100%)",
+        settTooltip: "Κλάση 1: Πολύ Κοντά (< 100 m)\nΚλάση 2: Κοντά (100–300 m)\nΚλάση 3: Μέτρια (300–1000 m)\nΚλάση 4: Μακριά (> 1000 m)",
+        emergencyTooltip: "Κλάση 1: Άριστη (< 15 λεπτά αντίδρασης)\nΚλάση 2: Καλή (15–30 λεπτά)\nΚλάση 3: Μέτρια (30–45 λεπτά)\nΚλάση 4: Κακή (> 45 λεπτά)",
+        roadaccessTooltip: "Κλάση 1: Άριστη πρόσβαση (> 8)\nΚλάση 2: Καλή πρόσβαση (6–8)\nΚλάση 3: Μέτρια πρόσβαση (4–6)\nΚλάση 4: Κακή πρόσβαση (< 4)",
+        strucTooltip: "Κλάση 1: Πυροανθεκτικά υλικά, αμυντικός χώρος\nΚλάση 2: Τυπική κατασκευή, κάποια προστασία\nΚλάση 3: Μικτή ποιότητα κατασκευής\nΚλάση 4: Ευάλωτη κατασκευή, χωρίς προστασία",
+        waterTooltip: "Κλάση 1: Επαρκείς κρουνοί, υψηλή πίεση\nΚλάση 2: Περιορισμένοι κρουνοί, επαρκής πίεση\nΚλάση 3: Λίγοι κρουνοί, μεταβλητή πίεση\nΚλάση 4: Χωρίς κρουνούς, ανεπαρκής παροχή",
+        socioTooltip: "Κλάση 1: Χαμηλή τρωτότητα (< 25%)\nΚλάση 2: Μέτρια τρωτότητα (25%–50%)\nΚλάση 3: Υψηλή τρωτότητα (50%–75%)\nΚλάση 4: Πολύ υψηλή τρωτότητα (> 75%)"
+      },
+      en: {
+        appTitle: "Enhanced Wildfire Risk Assessment",
+        secDangerTitle: "🔥 Hazard Factors",
+        lblSlope: "Terrain Slope:",
+        lblAspect: "Slope Aspect:",
+        lblFuel: "Fuel Type & Load:",
+        lblMoisture: "Fine Fuel Moisture (%):",
+        lblElevation: "Elevation (m):",
+        lblWindspeed: "Wind Speed (km/h):",
+        secExposureTitle: "🏘️ Exposure Factors",
+        lblBldDensity: "Building Density (/km²):",
+        lblPopDensity: "Population Density (people/km²):",
+        lblInfrastructure: "Threatened Land Uses:",
+        lblDistSettlement: "Distance to Settlement (m):",
+        secVulnTitle: "🛡️ Vulnerability Factors",
+        lblEmergencyResponse: "Response Capability:",
+        lblRoadAccess: "Road Network Accessibility (0-10):",
+        lblStruc: "Building Construction Quality:",
+        lblWaterSupply: "Water Source & Network:",
+        lblSocio: "Socio-economic Vulnerability Index (%):",
+        dangerTitle: "🔥📊 Fire Hazard Index",
+        exposureTitle: "🏘️📊 Exposure Index",
+        vulnTitle: "🛡️📊 Vulnerability Index",
+        ignitionTitle: "⚡📊 Ignition Probability",
+        propagationTitle: "🌋📊 Fire Spread Potential",
+        riskTitle: "⚠️📊 Integrated Wildfire Risk",
+        infoTitle: "Information",
+        weightLabel: "Weight:",
+
+        aspectOpts: [
+          "North-facing (Class 1)",
+          "East/West-facing (Class 2)",
+          "South-facing (Class 3)"
+        ],
+        fuelOpts: [
+          "Grasses/Hardwood (Class 1)",
+          "Sparse shrubs & scrubland (Class 2)",
+          "Dense shrubland (Class 3)",
+          "Coniferous/Tall shrubs (Class 4)",
+          "Heavy fuel accumulation (Class 5)"
+        ],
+        infrastructureOpts: [
+          "Agricultural use (Class 1)",
+          "Industrial use (Class 2)",
+          "Public & Commercial uses (Class 3)",
+          "Hospitals, Schools, Hotels, Elderly care (Class 4)"
+        ],
+        emergencyOpts: [
+          "Excellent (< 15 min) (Class 1)",
+          "Good (15–30 min) (Class 2)",
+          "Moderate (30–45 min) (Class 3)",
+          "Poor (> 45 min) (Class 4)"
+        ],
+        strucOpts: [
+          "Fire-resistant materials, defensible space (Class 1)",
+          "Standard construction, some protection (Class 2)",
+          "Mixed construction quality (Class 3)",
+          "Vulnerable construction, no protection (Class 4)"
+        ],
+        waterOpts: [
+          "Adequate hydrants, high pressure (Class 1)",
+          "Limited hydrants, adequate pressure (Class 2)",
+          "Few hydrants, adequate pressure (Class 3)",
+          "No hydrants, inadequate water supply (Class 4)"
+        ],
+
+        // Tooltips
+        slopeTooltip: "Class 1: Low hazard (≤ 5°)\nClass 2: Moderate (5°–15°)\nClass 3: High (15°–30°)\nClass 4: Very High (30°–45°)\nClass 5: Extreme (> 45°)",
+        aspectTooltip: "Class 1: North-facing – Low hazard\nClass 2: East/West-facing – Moderate\nClass 3: South-facing – High hazard",
+        fuelTooltip: "Class 1: Sparse grass/deciduous\nClass 2: Mixed shrubland\nClass 3: Dense shrubland\nClass 4: Coniferous forest\nClass 5: Heavy fuel accumulation",
+        moistureTooltip: "Class 1: Very High (> 25%)\nClass 2: High (15%–25%)\nClass 3: Moderate (8%–15%)\nClass 4: Low (4%–8%)\nClass 5: Critical (< 4%)",
+        elevationTooltip: "Class 1: Low elevation (0–500 m)\nClass 2: Medium elevation (500–1000 m)\nClass 3: High elevation (1000–1500 m)",
+        windTooltip: "Class 1: Calm (< 10 km/h)\nClass 2: Light wind (10–20 km/h)\nClass 3: Moderate wind (20–35 km/h)\nClass 4: Strong wind (35–50 km/h)\nClass 5: Extreme wind (> 50 km/h)",
+        bldTooltip: "Class 1: Very High (> 1000/km²)\nClass 2: High (500–1000/km²)\nClass 3: Moderate (200–500/km²)\nClass 4: Low (< 200/km²)",
+        popTooltip: "Class 1: Very High (> 2000/km²)\nClass 2: High (1000–2000/km²)\nClass 3: Moderate (300–1000/km²)\nClass 4: Low (< 300/km²)",
+        infrastructureTooltip: "Class 1: Agricultural use (0-20%)\nClass 2: Industrial use (20-40%)\nClass 3: Public & Commercial uses (40-60%)\nClass 4: Hospitals, Schools, Hotels, Elderly care (100%)",
+        settTooltip: "Class 1: Very Close (< 100 m)\nClass 2: Close (100–300 m)\nClass 3: Moderate (300–1000 m)\nClass 4: Far (> 1000 m)",
+        emergencyTooltip: "Class 1: Excellent (< 15 min response time)\nClass 2: Good (15–30 min)\nClass 3: Moderate (30–45 min)\nClass 4: Poor (> 45 min)",
+        roadaccessTooltip: "Class 1: Excellent access (> 8)\nClass 2: Good access (6–8)\nClass 3: Moderate access (4–6)\nClass 4: Poor access (< 4)",
+        strucTooltip: "Class 1: Fire-resistant materials, defensible space\nClass 2: Standard construction, some protection\nClass 3: Mixed construction quality\nClass 4: Vulnerable construction, no protection",
+        waterTooltip: "Class 1: Adequate hydrants, high pressure\nClass 2: Limited hydrants, adequate pressure\nClass 3: Few hydrants, variable pressure\nClass 4: No hydrants, inadequate water supply",
+        socioTooltip: "Class 1: Low vulnerability (< 25%)\nClass 2: Moderate vulnerability (25%–50%)\nClass 3: High vulnerability (50%–75%)\nClass 4: Very high vulnerability (> 75%)"
+      },
+      es: {
+        appTitle: "Evaluación Mejorada de Riesgo de Incendios Forestales",
+        secDangerTitle: "🔥 Factores de Peligro",
+        lblSlope: "Pendiente del Terreno:",
+        lblAspect: "Orientación de la Ladera:",
+        lblFuel: "Tipo y Carga de Combustible:",
+        lblMoisture: "Humedad del Combustible Fino (%):",
+        lblElevation: "Elevación (m):",
+        lblWindspeed: "Velocidad del Viento (km/h):",
+        secExposureTitle: "🏘️ Factores de Exposición",
+        lblBldDensity: "Densidad de Edificios (/km²):",
+        lblPopDensity: "Densidad de Población (personas/km²):",
+        lblInfrastructure: "Usos del Suelo Amenazados:",
+        lblDistSettlement: "Distancia al Asentamiento (m):",
+        secVulnTitle: "🛡️ Factores de Vulnerabilidad",
+        lblEmergencyResponse: "Capacidad de Respuesta:",
+        lblRoadAccess: "Accesibilidad de la Red Vial (0-10):",
+        lblStruc: "Calidad de Construcción de Edificios:",
+        lblWaterSupply: "Fuente de Agua y Red:",
+        lblSocio: "Índice de Vulnerabilidad Socioeconómica (%):",
+        dangerTitle: "🔥📊 Índice de Peligro de Incendio",
+        exposureTitle: "🏘️📊 Índice de Exposición",
+        vulnTitle: "🛡️📊 Índice de Vulnerabilidad",
+        ignitionTitle: "⚡📊 Probabilidad de Ignición",
+        propagationTitle: "🌋📊 Potencial de Propagación del Fuego",
+        riskTitle: "⚠️📊 Índice de Riesgo Integral",
+        infoTitle: "Información",
+        weightLabel: "Peso:",
+
+        aspectOpts: [
+          "Orientación norte (Clase 1)",
+          "Orientación este/oeste (Clase 2)",
+          "Orientación sur (Clase 3)"
+        ],
+        fuelOpts: [
+          "Pastos/Frondosas (Clase 1)",
+          "Matorrales dispersos y matorral (Clase 2)",
+          "Matorral denso (Clase 3)",
+          "Coníferas/Matorrales altos (Clase 4)",
+          "Acumulación pesada de combustible (Clase 5)"
+        ],
+        infrastructureOpts: [
+          "Uso agrícola (Clase 1)",
+          "Uso industrial (Clase 2)",
+          "Usos públicos y comerciales (Clase 3)",
+          "Hospitales, Escuelas, Hoteles, Cuidado de ancianos (Clase 4)"
+        ],
+        emergencyOpts: [
+          "Excelente (< 15 min) (Clase 1)",
+          "Buena (15–30 min) (Clase 2)",
+          "Moderada (30–45 min) (Clase 3)",
+          "Pobre (> 45 min) (Clase 4)"
+        ],
+        strucOpts: [
+          "Materiales resistentes al fuego, espacio defendible (Clase 1)",
+          "Construcción estándar, alguna protección (Clase 2)",
+          "Calidad de construcción mixta (Clase 3)",
+          "Construcción vulnerable, sin protección (Clase 4)"
+        ],
+        waterOpts: [
+          "Hidrantes adecuados, alta presión (Clase 1)",
+          "Hidrantes limitados, presión adecuada (Clase 2)",
+          "Pocos hidrantes, presión variable (Clase 3)",
+          "Sin hidrantes, suministro de agua inadecuado (Clase 4)"
+        ],
+
+        // Tooltips
+        slopeTooltip: "Clase 1: Peligro bajo (≤ 5°)\nClase 2: Moderado (5°–15°)\nClase 3: Alto (15°–30°)\nClase 4: Muy Alto (30°–45°)\nClase 5: Extremo (> 45°)",
+        aspectTooltip: "Clase 1: Orientación norte – Peligro bajo\nClase 2: Orientación este/oeste – Moderado\nClase 3: Orientación sur – Peligro alto",
+        fuelTooltip: "Clase 1: Pastos dispersos/caducifolios\nClase 2: Matorral mixto\nClase 3: Matorral denso\nClase 4: Bosque de coníferas\nClase 5: Acumulación pesada de combustible",
+        moistureTooltip: "Clase 1: Muy Alta (> 25%)\nClase 2: Alta (15%–25%)\nClase 3: Moderada (8%–15%)\nClase 4: Baja (4%–8%)\nClase 5: Crítica (< 4%)",
+        elevationTooltip: "Clase 1: Elevación baja (0–500 m)\nClase 2: Elevación media (500–1000 m)\nClase 3: Elevación alta (1000–1500 m)",
+        windTooltip: "Clase 1: Calma (< 10 km/h)\nClase 2: Viento ligero (10–20 km/h)\nClase 3: Viento moderado (20–35 km/h)\nClase 4: Viento fuerte (35–50 km/h)\nClase 5: Viento extremo (> 50 km/h)",
+        bldTooltip: "Clase 1: Muy Alta (> 1000/km²)\nClase 2: Alta (500–1000/km²)\nClase 3: Moderada (200–500/km²)\nClase 4: Baja (< 200/km²)",
+        popTooltip: "Clase 1: Muy Alta (> 2000/km²)\nClase 2: Alta (1000–2000/km²)\nClase 3: Moderada (300–1000/km²)\nClase 4: Baja (< 300/km²)",
+        infrastructureTooltip: "Clase 1: Uso agrícola (0-20%)\nClase 2: Uso industrial (20-40%)\nClase 3: Usos públicos y comerciales (40-60%)\nClase 4: Hospitales, Escuelas, Hoteles, Cuidado de ancianos (100%)",
+        settTooltip: "Clase 1: Muy Cerca (< 100 m)\nClase 2: Cerca (100–300 m)\nClase 3: Moderada (300–1000 m)\nClase 4: Lejos (> 1000 m)",
+        emergencyTooltip: "Clase 1: Excelente (< 15 min tiempo de respuesta)\nClase 2: Buena (15–30 min)\nClase 3: Moderada (30–45 min)\nClase 4: Pobre (> 45 min)",
+        roadaccessTooltip: "Clase 1: Acceso excelente (> 8)\nClase 2: Buen acceso (6–8)\nClase 3: Acceso moderado (4–6)\nClase 4: Acceso pobre (< 4)",
+        strucTooltip: "Clase 1: Materiales resistentes al fuego, espacio defendible\nClase 2: Construcción estándar, alguna protección\nClase 3: Calidad de construcción mixta\nClase 4: Construcción vulnerable, sin protección",
+        waterTooltip: "Clase 1: Hidrantes adecuados, alta presión\nClase 2: Hidrantes limitados, presión adecuada\nClase 3: Pocos hidrantes, presión variable\nClase 4: Sin hidrantes, suministro de agua inadecuado",
+        socioTooltip: "Clase 1: Baja vulnerabilidad (< 25%)\nClase 2: Vulnerabilidad moderada (25%–50%)\nClase 3: Alta vulnerabilidad (50%–75%)\nClase 4: Muy alta vulnerabilidad (> 75%)"
+      },
+      it: {
+        appTitle: "Valutazione Migliorata del Rischio di Incendi Boschivi",
+        secDangerTitle: "🔥 Fattori di Pericolo",
+        lblSlope: "Pendenza del Terreno:",
+        lblAspect: "Orientamento del Versante:",
+        lblFuel: "Tipo e Carico di Combustibile:",
+        lblMoisture: "Umidità del Combustibile Fine (%):",
+        lblElevation: "Quota (m):",
+        lblWindspeed: "Velocità del Vento (km/h):",
+        secExposureTitle: "🏘️ Fattori di Esposizione",
+        lblBldDensity: "Densità degli Edifici (/km²):",
+        lblPopDensity: "Densità della Popolazione (persone/km²):",
+        lblInfrastructure: "Usi del Territorio Minacciati:",
+        lblDistSettlement: "Distanza dall'Insediamento (m):",
+        secVulnTitle: "🛡️ Fattori di Vulnerabilità",
+        lblEmergencyResponse: "Capacità di Risposta:",
+        lblRoadAccess: "Accessibilità della Rete Stradale (0-10):",
+        lblStruc: "Qualità della Costruzione degli Edifici:",
+        lblWaterSupply: "Fonte Idrica e Rete:",
+        lblSocio: "Indice di Vulnerabilità Socioeconomica (%):",
+        dangerTitle: "🔥📊 Indice di Pericolo Incendio",
+        exposureTitle: "🏘️📊 Indice di Esposizione",
+        vulnTitle: "🛡️📊 Indice di Vulnerabilità",
+        ignitionTitle: "⚡📊 Probabilità di Innesco",
+        propagationTitle: "🌋📊 Potenziale di Propagazione del Fuoco",
+        riskTitle: "⚠️📊 Indice Integrato del Rischio",
+        infoTitle: "Informazioni",
+        weightLabel: "Peso:",
+
+        aspectOpts: [
+          "Esposto a nord (Classe 1)",
+          "Esposto a est/ovest (Classe 2)",
+          "Esposto a sud (Classe 3)"
+        ],
+        fuelOpts: [
+          "Erbe/Latifoglie (Classe 1)",
+          "Arbusti sparsi e macchia (Classe 2)",
+          "Arbusteto denso (Classe 3)",
+          "Conifere/Arbusti alti (Classe 4)",
+          "Pesante accumulo di combustibile (Classe 5)"
+        ],
+        infrastructureOpts: [
+          "Uso agricolo (Classe 1)",
+          "Uso industriale (Classe 2)",
+          "Usi pubblici e commerciali (Classe 3)",
+          "Ospedali, Scuole, Hotel, Cura degli anziani (Classe 4)"
+        ],
+        emergencyOpts: [
+          "Eccellente (< 15 min) (Classe 1)",
+          "Buona (15–30 min) (Classe 2)",
+          "Moderata (30–45 min) (Classe 3)",
+          "Scarsa (> 45 min) (Classe 4)"
+        ],
+        strucOpts: [
+          "Materiali resistenti al fuoco, spazio difendibile (Classe 1)",
+          "Costruzione standard, qualche protezione (Classe 2)",
+          "Qualità di costruzione mista (Classe 3)",
+          "Costruzione vulnerabile, nessuna protezione (Classe 4)"
+        ],
+        waterOpts: [
+          "Idranti adeguati, alta pressione (Classe 1)",
+          "Idranti limitati, pressione adeguata (Classe 2)",
+          "Pochi idranti, pressione variabile (Classe 3)",
+          "Nessun idrante, approvvigionamento idrico inadeguato (Classe 4)"
+        ],
+
+        // Tooltips
+        slopeTooltip: "Classe 1: Pericolo basso (≤ 5°)\nClasse 2: Moderato (5°–15°)\nClasse 3: Alto (15°–30°)\nClasse 4: Molto Alto (30°–45°)\nClasse 5: Estremo (> 45°)",
+        aspectTooltip: "Classe 1: Esposto a nord – Pericolo basso\nClasse 2: Esposto a est/ovest – Moderato\nClasse 3: Esposto a sud – Pericolo alto",
+        fuelTooltip: "Classe 1: Erbe sparse/caducifoglie\nClasse 2: Macchia mista\nClasse 3: Macchia densa\nClasse 4: Foresta di conifere\nClasse 5: Pesante accumulo di combustibile",
+        moistureTooltip: "Classe 1: Molto Alta (> 25%)\nClasse 2: Alta (15%–25%)\nClasse 3: Moderata (8%–15%)\nClasse 4: Bassa (4%–8%)\nClasse 5: Critica (< 4%)",
+        elevationTooltip: "Classe 1: Quota bassa (0–500 m)\nClasse 2: Quota media (500–1000 m)\nClasse 3: Quota alta (1000–1500 m)",
+        windTooltip: "Classe 1: Calma (< 10 km/h)\nClasse 2: Vento leggero (10–20 km/h)\nClasse 3: Vento moderato (20–35 km/h)\nClasse 4: Vento forte (35–50 km/h)\nClasse 5: Vento estremo (> 50 km/h)",
+        bldTooltip: "Classe 1: Molto Alta (> 1000/km²)\nClasse 2: Alta (500–1000/km²)\nClasse 3: Moderata (200–500/km²)\nClasse 4: Bassa (< 200/km²)",
+        popTooltip: "Classe 1: Molto Alta (> 2000/km²)\nClasse 2: Alta (1000–2000/km²)\nClasse 3: Moderata (300–1000/km²)\nClasse 4: Bassa (< 300/km²)",
+        infrastructureTooltip: "Classe 1: Uso agricolo (0-20%)\nClasse 2: Uso industriale (20-40%)\nClasse 3: Usi pubblici e commerciali (40-60%)\nClasse 4: Ospedali, Scuole, Hotel, Cura degli anziani (100%)",
+        settTooltip: "Classe 1: Molto Vicino (< 100 m)\nClasse 2: Vicino (100–300 m)\nClasse 3: Moderato (300–1000 m)\nClasse 4: Lontano (> 1000 m)",
+        emergencyTooltip: "Classe 1: Eccellente (< 15 min tempo di risposta)\nClasse 2: Buona (15–30 min)\nClasse 3: Moderata (30–45 min)\nClasse 4: Scarsa (> 45 min)",
+        roadaccessTooltip: "Classe 1: Accesso eccellente (> 8)\nClasse 2: Buon accesso (6–8)\nClasse 3: Accesso moderato (4–6)\nClasse 4: Accesso scarso (< 4)",
+        strucTooltip: "Classe 1: Materiali resistenti al fuoco, spazio difendibile\nClasse 2: Costruzione standard, qualche protezione\nClasse 3: Qualità di costruzione mista\nClasse 4: Costruzione vulnerabile, nessuna protezione",
+        waterTooltip: "Classe 1: Idranti adeguati, alta pressione\nClasse 2: Idranti limitati, pressione adeguata\nClasse 3: Pochi idranti, pressione variabile\nClasse 4: Nessun idrante, approvvigionamento idrico inadeguato",
+        socioTooltip: "Classe 1: Bassa vulnerabilità (< 25%)\nClasse 2: Vulnerabilità moderata (25%–50%)\nClasse 3: Alta vulnerabilità (50%–75%)\nClasse 4: Vulnerabilità molto alta (> 75%)"
+      }
+    };
+
+    let currentLanguage = 'el';
+
+    /**********************************************
+     * 3) ENHANCED CLASSIFICATION FUNCTIONS
+    **********************************************/
+
+    // Improved slope classification with exponential weighting
+    function slopeClass(val) {
+      if (val <= 5) return 1;
+      if (val <= 15) return 2;
+      if (val <= 30) return 3;
+      if (val <= 45) return 4;
+      return 5;
+    }
+
+    // Enhanced moisture classification with critical thresholds
+    function moistureClass(val) {
+      if (val > 40) return 1;  // Very High (safe)
+      if (val > 25) return 2;  // High
+      if (val > 15) return 3;  // Moderate
+      if (val > 10) return 4;  // Low (dangerous)
+      return 5;                // Critical (extreme danger)
+    }
+
+    // Simplified elevation classification (3 classes, 500m intervals)
+    function elevClass(val) {
+      if (val <= 500) return 1;   // Low elevation (higher fire risk)
+      if (val <= 1000) return 2;  // Medium elevation
+      return 3;                   // High elevation (lower fire risk)
+    }
+
+    // Enhanced wind speed classification with extreme emphasis
+    function windClass(val) {
+      if (val < 5) return 1;       // Calm
+      if (val < 10) return 2;      // Light
+      if (val < 20) return 3;      // Moderate
+      if (val < 40) return 4;      // Strong (dangerous)
+      return 5;                    // Extreme (critical)
+    }
+
+    // Enhanced population density - higher density = higher exposure
+    function popClass(val) {
+      if (val > 2000) return 4;    // Very High exposure (critical)
+      if (val > 1000) return 3;    // High
+      if (val > 300) return 2;     // Moderate
+      return 1;                    // Low
+    }
+
+    // Building density - higher density = higher exposure
+    function bldClass(val) {
+      if (val > 1000) return 4;    // Very High exposure
+      if (val > 500) return 3;     // High
+      if (val > 200) return 2;     // Moderate
+      return 1;                    // Low
+    }
+
+    // Distance to settlement - closer = higher exposure
+    function dsSettClass(val) {
+      if (val < 100) return 4;     // Very Close (critical exposure)
+      if (val < 300) return 3;     // Close
+      if (val < 1000) return 2;    // Moderate
+      return 1;                    // Far (low exposure)
+    }
+
+    // Road accessibility - lower = higher vulnerability
+    function roadAccessClass(val) {
+      if (val > 8) return 1;       // Excellent (low vulnerability)
+      if (val > 6) return 2;       // Good
+      if (val > 4) return 3;       // Moderate
+      return 4;                    // Poor (high vulnerability)
+    }
+
+    function socioClass(val) {
+      if (val < 25) return 1;
+      if (val < 50) return 2;
+      if (val < 75) return 3;
+      return 4;
+    }
+
+    // Simple dropdown classifications
+    function aspectClass(val) { return parseFloat(val); }
+    function fuelClass(val) { return parseFloat(val); }
+    function infrastructureClass(val) { return parseFloat(val); }
+    function emergencyClass(val) { return parseFloat(val); }
+    function strucClass(val) { return parseFloat(val); }
+    function waterClass(val) { return parseFloat(val); }
+
+    /**********************************************
+     * 4) ENHANCED CALCULATION FUNCTIONS WITH WEIGHT NORMALIZATION
+    **********************************************/
+
+    function computeHazardScore() {
+      const sC = slopeClass(parseFloat(slopeSlider.value));
+      const aC = aspectClass(aspectSelect.value);
+      const fC = fuelClass(parseFloat(fuelSelect.value));
+      const mC = moistureClass(parseFloat(moistureSlider.value));
+      const eC = elevClass(parseFloat(elevSlider.value));
+      const wC = windClass(parseFloat(windSlider.value));
+
+      // Extreme condition multipliers
+      const moistureVal = parseFloat(moistureSlider.value);
+      const windVal = parseFloat(windSlider.value);
+      const slopeVal = parseFloat(slopeSlider.value);
+
+      // Base calculation with enhanced weights
+      let raw = sC*0.20 + aC*0.08 + fC*0.35 + mC*0.25 + eC*0.07 + wC*0.05;
+
+      // Extreme condition bonuses
+      let extremeMultiplier = 1.0;
+
+      // Critical moisture bonus (< 10%)
+      if (moistureVal < 10) extremeMultiplier += 0.5;
+
+      // High wind bonus (> 40 km/h) - VERY aggressive
+      if (windVal > 40) extremeMultiplier += 0.8;
+
+      // Steep slope + south aspect + coniferous combination
+      if (slopeVal > 15 && aC === 3 && fC >= 4) extremeMultiplier += 0.6;
+
+      // Normalize and apply extreme multiplier
+      raw = (raw / 5.0) * extremeMultiplier;
+
+      return Math.min(raw, 1.0);
+    }
+
+    function computeExposureScore() {
+      const bC = bldClass(parseFloat(bldSlider.value));
+      const pC = popClass(parseFloat(popSlider.value));
+      const iC = infrastructureClass(infrastructureSelect.value);
+      const dsC = dsSettClass(parseFloat(dsSettSlider.value));
+
+      // Population density has MAJOR impact on exposure
+      const popVal = parseFloat(popSlider.value);
+      let popWeight = 0.40; // Increased from 0.30
+
+      // Critical infrastructure multiplier
+      let infraMultiplier = 1.0;
+      if (iC === 4) infraMultiplier = 2.0; // Hospitals, schools, etc.
+      else if (iC === 3) infraMultiplier = 1.5; // Public/commercial
+
+      const raw = (bC*0.15 + pC*popWeight + iC*0.25 + dsC*0.20) * infraMultiplier;
+      return Math.min(raw / 4.0, 1.0);
+    }
+
+    function computeVulnerabilityScore() {
+      const eC = emergencyClass(emergencySelect.value);
+      const rC = roadAccessClass(parseFloat(roadAccessSlider.value));
+      const sC = strucClass(strucSelect.value);
+      const wC = waterClass(waterSelect.value);
+      const svC = socioClass(parseFloat(socioVulnSlider.value));
+
+      // Enhanced weights for comprehensive vulnerability assessment
+      const raw = eC*0.30 + rC*0.20 + sC*0.25 + wC*0.15 + svC*0.10;
+      return raw / 4.0;
+    }
+
+    function computeIgnitionProbability() {
+      const fuelNorm = (fuelClass(parseFloat(fuelSelect.value)) - 1) / 4.0;
+      const moistureVal = parseFloat(moistureSlider.value);
+      const moistureNorm = Math.max(0, (100 - moistureVal) / 100.0);
+      const windNorm = Math.min(parseFloat(windSlider.value) / 50.0, 1.0);
+      const exposureScore = computeExposureScore();
+
+      // Critical thresholds for extreme ignition probability
+      let extremeBonus = 0;
+      if (moistureVal < 10 && windNorm > 0.8) extremeBonus = 0.3; // Critical combo
+
+      const base = (fuelNorm*0.35 + moistureNorm*0.40 + windNorm*0.15 + exposureScore*0.10);
+      return Math.min(base + extremeBonus, 1.0);
+    }
+
+    function computeFireSpreadPotential() {
+      const ignition = computeIgnitionProbability();
+      const slopeVal = parseFloat(slopeSlider.value);
+      const windVal = parseFloat(windSlider.value);
+      const moistureVal = parseFloat(moistureSlider.value);
+      const fuelVal = fuelClass(parseFloat(fuelSelect.value));
+
+      const slopeNorm = Math.min(slopeVal / 45.0, 1.0);
+      const windNorm = Math.min(windVal / 50.0, 1.0);
+      const fuelNorm = (fuelVal - 1) / 4.0;
+      const moistureEffect = Math.max(0, (100 - moistureVal) / 100.0);
+
+      // Extreme fire behavior conditions
+      let fireStormMultiplier = 1.0;
+      if (windVal > 40 && slopeVal > 25 && moistureVal < 10) {
+        fireStormMultiplier = 2.0; // Fire storm conditions
+      }
+
+      const baseSpread = ignition*0.40 + slopeNorm*0.25 + windNorm*0.20 + fuelNorm*0.15;
+      return Math.min(baseSpread * fireStormMultiplier, 1.0);
+    }
+
+    function normalizeWeights(changedSlider = null) {
+      const sliders = [
+        { slider: hazardWeightSlider, value: parseFloat(hazardWeightSlider.value), id: 'hazard' },
+        { slider: exposureWeightSlider, value: parseFloat(exposureWeightSlider.value), id: 'exposure' },
+        { slider: vulnWeightSlider, value: parseFloat(vulnWeightSlider.value), id: 'vulnerability' },
+        { slider: ignitionWeightSlider, value: parseFloat(ignitionWeightSlider.value), id: 'ignition' },
+        { slider: propagationWeightSlider, value: parseFloat(propagationWeightSlider.value), id: 'propagation' }
+      ];
+
+      let total = sliders.reduce((sum, s) => sum + s.value, 0);
+      let targetTotal = 100;
+
+      if (total === 0) {
+        // If all are zero, reset to default distribution
+        const defaultWeight = targetTotal / sliders.length;
+        sliders.forEach(s => s.slider.value = defaultWeight);
+        return { hazard: 0.2, exposure: 0.2, vulnerability: 0.2, ignition: 0.2, propagation: 0.2 };
+      }
+
+      if (total !== targetTotal) {
+        const diff = total - targetTotal;
+        const changeableSliders = sliders.filter(s => s.slider !== changedSlider);
+
+        if (changeableSliders.length > 0) {
+          const currentChangeableTotal = changeableSliders.reduce((sum, s) => sum + s.value, 0);
+
+          if (currentChangeableTotal === 0 && diff > 0) {
+            // If only one slider is active and it's over 100, clamp it to 100
+            if (changedSlider) changedSlider.value = targetTotal;
+          } else {
+            changeableSliders.forEach(s => {
+              // Adjust proportionally
+              let newValue = s.value - (diff * (s.value / currentChangeableTotal));
+              // Ensure no negative values or values exceeding 100 (if it's the only one left)
+              newValue = Math.max(0, Math.min(100, newValue));
+              s.slider.value = newValue.toFixed(1); // Keep one decimal for finer adjustment
+            });
+          }
+        }
+      }
+
+      // Read values again after potential adjustment
+      const finalWeights = {
+        hazard: parseFloat(hazardWeightSlider.value),
+        exposure: parseFloat(exposureWeightSlider.value),
+        vulnerability: parseFloat(vulnWeightSlider.value),
+        ignition: parseFloat(ignitionWeightSlider.value),
+        propagation: parseFloat(propagationWeightSlider.value)
+      };
+
+      const finalTotal = finalWeights.hazard + finalWeights.exposure + finalWeights.vulnerability + finalWeights.ignition + finalWeights.propagation;
+
+      // Return normalized values for calculation
+      return {
+        hazard: finalWeights.hazard / finalTotal,
+        exposure: finalWeights.exposure / finalTotal,
+        vulnerability: finalWeights.vulnerability / finalTotal,
+        ignition: finalWeights.ignition / finalTotal,
+        propagation: finalWeights.propagation / finalTotal
+      };
+    }
+
+
+    function computeIntegratedRisk() {
+      const weights = normalizeWeights(); // Call normalizeWeights without a changedSlider
+
+      const hazard = computeHazardScore();
+      const exposure = computeExposureScore();
+      const vulnerability = computeVulnerabilityScore();
+      const ignition = computeIgnitionProbability();
+      const spread = computeFireSpreadPotential();
+
+      // Enhanced risk integration with normalized weights
+      const risk = (hazard * weights.hazard) +
+                   (exposure * weights.exposure) +
+                   (vulnerability * weights.vulnerability) +
+                   (ignition * weights.ignition) +
+                   (spread * weights.propagation);
+
+      return Math.min(risk, 1.0);
+    }
+
+    /**********************************************
+     * 5) ENHANCED DISPLAY UPDATE FUNCTIONS
+    **********************************************/
+
+    function updateDisplays() {
+      if (slopeVal) slopeVal.textContent = slopeSlider.value + '°';
+      if (moistureVal) moistureVal.textContent = moistureSlider.value + '%';
+      if (elevVal) elevVal.textContent = elevSlider.value + ' m';
+      if (windVal) windVal.textContent = windSlider.value + ' km/h';
+      if (bldVal) bldVal.textContent = bldSlider.value;
+      if (popVal) popVal.textContent = popSlider.value;
+      if (dsSettVal) dsSettVal.textContent = dsSettSlider.value + ' m';
+      if (roadAccessVal) roadAccessVal.textContent = roadAccessSlider.value;
+      if (socioVulnVal) socioVulnVal.textContent = socioVulnSlider.value + '%';
+
+      // Update weight displays
+      if (hazardWeightVal) hazardWeightVal.textContent = parseFloat(hazardWeightSlider.value).toFixed(1) + '%';
+      if (exposureWeightVal) exposureWeightVal.textContent = parseFloat(exposureWeightSlider.value).toFixed(1) + '%';
+      if (vulnWeightVal) vulnWeightVal.textContent = parseFloat(vulnWeightSlider.value).toFixed(1) + '%';
+      if (ignitionWeightVal) ignitionWeightVal.textContent = parseFloat(ignitionWeightSlider.value).toFixed(1) + '%';
+      if (propagationWeightVal) propagationWeightVal.textContent = parseFloat(propagationWeightSlider.value).toFixed(1) + '%';
+    }
+
+    function getClassFromScore(score, numClasses = 5) {
+      const normalized = Math.max(0, Math.min(1, score));
+      // Distribute score across classes, ensuring the highest score maps to the highest class
+      // For 5 classes: 0-0.2 -> 1, 0.2-0.4 -> 2, etc.
+      // For 3 classes: 0-0.33 -> 1, 0.33-0.66 -> 2, etc.
+      return Math.min(Math.floor(normalized * numClasses) + 1, numClasses);
+    }
+
+    function updateBars(event) {
+      // If the event came from a weight slider, normalize weights accordingly
+      if (event && event.target && event.target.id.includes('weight')) {
+          normalizeWeights(event.target);
+      } else {
+          // Otherwise, just ensure weights sum to 100% without re-distributing
+          normalizeWeights();
+      }
+
+      updateDisplays();
+
+      const hazardScore = computeHazardScore();
+      const exposureScore = computeExposureScore();
+      const vulnerabilityScore = computeVulnerabilityScore();
+      const ignitionScore = computeIgnitionProbability();
+      const spreadScore = computeFireSpreadPotential();
+      const riskScore = computeIntegratedRisk();
+
+      const hazardPct = Math.round(hazardScore * 100);
+      const exposurePct = Math.round(exposureScore * 100);
+      const vulnerabilityPct = Math.round(vulnerabilityScore * 100);
+      const ignitionPct = Math.round(ignitionScore * 100);
+      const spreadPct = Math.round(spreadScore * 100);
+      const riskPct = Math.round(riskScore * 100);
+
+      // Update Hazard Bar
+      const hazardClass = getClassFromScore(hazardScore, 5);
+      dangerFill.className = 'bar-fill danger-class-' + hazardClass;
+      dangerFill.style.width = hazardPct + '%';
+      dangerLabel.textContent = hazardPct + '%';
+      dangerMarker.style.left = hazardPct + '%';
+
+      // Update Exposure Bar
+      const exposureClass = getClassFromScore(exposureScore, 3);
+      exposureFill.className = 'bar-fill expclass-' + exposureClass;
+      exposureFill.style.width = exposurePct + '%';
+      exposureLabel.textContent = exposurePct + '%';
+      exposureMarker.style.left = exposurePct + '%';
+
+      // Update Vulnerability Bar
+      const vulnerabilityClass = getClassFromScore(vulnerabilityScore, 3);
+      vulnFill.className = 'bar-fill vulnclass-' + vulnerabilityClass;
+      vulnFill.style.width = vulnerabilityPct + '%';
+      vulnLabel.textContent = vulnerabilityPct + '%';
+      vulnMarker.style.left = vulnerabilityPct + '%';
+
+      // Update Ignition Bar
+      const ignitionClass = getClassFromScore(ignitionScore, 3);
+      ignitionFill.className = 'bar-fill newclass-' + ignitionClass;
+      ignitionFill.style.width = ignitionPct + '%';
+      ignitionLabel.textContent = ignitionPct + '%';
+      ignitionMarker.style.left = ignitionPct + '%';
+
+      // Update Spread Bar
+      const spreadClass = getClassFromScore(spreadScore, 3);
+      propagationFill.className = 'bar-fill newclass-' + spreadClass;
+      propagationFill.style.width = spreadPct + '%';
+      propagationLabel.textContent = spreadPct + '%';
+      propagationMarker.style.left = spreadPct + '%';
+
+      // Update Risk Bar (using 5 classes from riskclass-1 to riskclass-5)
+      const riskClass = getClassFromScore(riskScore, 5);
+      riskFill.className = 'bar-fill riskclass-' + riskClass;
+      riskFill.style.width = riskPct + '%';
+      riskLabel.textContent = riskPct + '%';
+      riskMarker.style.left = riskPct + '%';
+    }
+
+    /**********************************************
+     * 6) ENHANCED LANGUAGE UPDATE FUNCTION
+    **********************************************/
+
+    function updateLanguage() {
+      const tr = translations[currentLanguage] || translations['en'];
+
+      // Update UI elements
+      appTitle.textContent = tr.appTitle;
+      secDangerTitle.innerHTML = tr.secDangerTitle;
+      secExposureTitle.innerHTML = tr.secExposureTitle;
+      secVulnTitle.innerHTML = tr.secVulnTitle;
+
+      // Update labels with current values
+      lblSlope.innerHTML = tr.lblSlope + ' <span id="slope-value">' + slopeSlider.value + '°</span>';
+      lblAspect.textContent = tr.lblAspect;
+      lblFuel.textContent = tr.lblFuel;
+      lblMoisture.innerHTML = tr.lblMoisture + ' <span id="moisture-value">' + moistureSlider.value + '%</span>';
+      lblElevation.innerHTML = tr.lblElevation + ' <span id="elevation-value">' + elevSlider.value + ' m</span>';
+      lblWindspeed.innerHTML = tr.lblWindspeed + ' <span id="windspeed-value">' + windSlider.value + ' km/h</span>';
+
+      lblBldDensity.innerHTML = tr.lblBldDensity + ' <span id="bld-density-value">' + bldSlider.value + '</span>';
+      lblPopDensity.innerHTML = tr.lblPopDensity + ' <span id="pop-density-value">' + popSlider.value + '</span>';
+      lblInfrastructure.textContent = tr.lblInfrastructure;
+      lblDistSettlement.innerHTML = tr.lblDistSettlement + ' <span id="dist-settlement-value">' + dsSettSlider.value + ' m</span>';
+
+      lblEmergencyResponse.textContent = tr.lblEmergencyResponse;
+      lblRoadAccess.innerHTML = tr.lblRoadAccess + ' <span id="road-access-value">' + roadAccessSlider.value + '</span>';
+      lblStruc.textContent = tr.lblStruc;
+      lblWaterSupply.textContent = tr.lblWaterSupply;
+      lblSocio.innerHTML = tr.lblSocio + ' <span id="socio-vuln-value">' + socioVulnSlider.value + '%</span>';
+
+      // Update output titles
+      document.getElementById('danger-title').textContent = tr.dangerTitle;
+      document.getElementById('exposure-title').textContent = tr.exposureTitle;
+      document.getElementById('vulnerability-title').textContent = tr.vulnTitle;
+      document.getElementById('ignition-title').textContent = tr.ignitionTitle;
+      document.getElementById('propagation-title').textContent = tr.propagationTitle;
+      document.getElementById('risk-title').textContent = tr.riskTitle;
+
+      // Update weight labels
+      const weightLabels = document.querySelectorAll('[id^="weight-label-"]');
+      weightLabels.forEach(label => {
+        if (label) label.textContent = tr.weightLabel;
+      });
+
+      // Update tooltips
+      document.getElementById('slope-tooltip').textContent = tr.slopeTooltip;
+      document.getElementById('aspect-tooltip').textContent = tr.aspectTooltip;
+      document.getElementById('fuel-tooltip').textContent = tr.fuelTooltip;
+      document.getElementById('moisture-tooltip').textContent = tr.moistureTooltip;
+      document.getElementById('elevation-tooltip').textContent = tr.elevationTooltip;
+      document.getElementById('windspeed-tooltip').textContent = tr.windTooltip;
+      document.getElementById('bld-tooltip').textContent = tr.bldTooltip;
+      document.getElementById('pop-tooltip').textContent = tr.popTooltip;
+      document.getElementById('infrastructure-tooltip').textContent = tr.infrastructureTooltip;
+      document.getElementById('sett-tooltip').textContent = tr.settTooltip;
+      document.getElementById('emergency-tooltip').textContent = tr.emergencyTooltip;
+      document.getElementById('roadaccess-tooltip').textContent = tr.roadaccessTooltip;
+      document.getElementById('struc-tooltip').textContent = tr.strucTooltip;
+      document.getElementById('water-tooltip').textContent = tr.waterTooltip;
+      document.getElementById('socio-vuln-tooltip').textContent = tr.socioTooltip;
+
+      // Update dropdown options
+      aspectSelect.innerHTML = '';
+      tr.aspectOpts.forEach((optText, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = optText;
+        aspectSelect.appendChild(opt);
+      });
+
+      fuelSelect.innerHTML = '';
+      tr.fuelOpts.forEach((optText, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = optText;
+        fuelSelect.appendChild(opt);
+      });
+
+      infrastructureSelect.innerHTML = '';
+      tr.infrastructureOpts.forEach((optText, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = optText;
+        infrastructureSelect.appendChild(opt);
+      });
+
+      emergencySelect.innerHTML = '';
+      tr.emergencyOpts.forEach((optText, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = optText;
+        emergencySelect.appendChild(opt);
+      });
+
+      strucSelect.innerHTML = '';
+      tr.strucOpts.forEach((optText, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = optText;
+        strucSelect.appendChild(opt);
+      });
+
+      waterSelect.innerHTML = '';
+      tr.waterOpts.forEach((optText, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = optText;
+        waterSelect.appendChild(opt);
+      });
+
+      // Re-bind value display elements after DOM update
+      slopeVal = document.getElementById('slope-value');
+      moistureVal = document.getElementById('moisture-value');
+      elevVal = document.getElementById('elevation-value');
+      windVal = document.getElementById('windspeed-value');
+      bldVal = document.getElementById('bld-density-value');
+      popVal = document.getElementById('pop-density-value');
+      dsSettVal = document.getElementById('dist-settlement-value');
+      roadAccessVal = document.getElementById('road-access-value');
+      socioVulnVal = document.getElementById('socio-vuln-value');
+
+      // Re-bind weight display elements
+      hazardWeightVal = document.getElementById('hazard-weight-val');
+      exposureWeightVal = document.getElementById('exposure-weight-val');
+      vulnWeightVal = document.getElementById('vulnerability-weight-val');
+      ignitionWeightVal = document.getElementById('ignition-weight-val');
+      propagationWeightVal = document.getElementById('propagation-weight-val');
+    }
+
+    /**********************************************
+     * 7) CUSTOM MODAL FUNCTION
+    **********************************************/
+
+    function showCustomAlert(title, message) {
+      // Remove any existing modals
+      const existingModals = document.querySelectorAll('.custom-modal');
+      existingModals.forEach(modal => modal.remove());
+
+      // Create custom modal
+      const modal = document.createElement('div');
+      modal.className = 'custom-modal';
+
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: white; padding: 25px; border-radius: 15px; max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto;
+        margin: 20px; animation: modalFadeIn 0.3s ease-out;
+      `;
+
+      const closeButton = document.createElement('button');
+      closeButton.textContent = 'OK';
+      closeButton.style.cssText = `
+        background: #667eea; color: white; border: none; padding: 12px 24px;
+        border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+        margin-top: 20px; transition: background 0.3s ease;
+      `;
+
+      closeButton.onmouseover = () => closeButton.style.background = '#5a67d8';
+      closeButton.onmouseout = () => closeButton.style.background = '#667eea';
+      closeButton.onclick = () => modal.remove();
+
+      content.innerHTML = `
+        <h3 style="margin: 0 0 15px 0; color: #2d3748; font-size: 1.25rem; font-weight: 600;">${title}</h3>
+        <p style="margin: 0; line-height: 1.6; white-space: pre-line; color: #4a5568; font-size: 0.95rem;">${message}</p>
+      `;
+
+      content.appendChild(closeButton);
+      modal.appendChild(content);
+      document.body.appendChild(modal);
+
+      // Close on click outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+
+      // Close on Escape key
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          modal.remove();
+          document.removeEventListener('keydown', handleEscape);
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    /**********************************************
+     * 8) ENHANCED EVENT LISTENERS
+    **********************************************/
+
+    function setupClickHandlers() {
+      // Enhanced click explanations with properly localized popups
+      document.getElementById('danger-title').addEventListener('click', () => {
+        const tr = translations[currentLanguage];
+        const hazardPct = Math.round(computeHazardScore() * 100);
+
+        let message = '';
+        if (currentLanguage === 'el') {
+          message = `🔥 ${tr.dangerTitle}\n\nΤρέχον Score: ${hazardPct}%\n\nΑυτός ο δείκτης συνδυάζει:\n• Κλίση εδάφους (επιτάχυνση εξάπλωσης)\n• Χαρακτηριστικά καυσίμων (καυστικότητα)\n• Καιρικές συνθήκες (δυναμικό ανάφλεξης)\n• Τοπογραφικές επιδράσεις (μικροκλίμα)\n\nΤο ποσοστό ${hazardPct}% δείχνει τη σχετική ένταση του κινδύνου πυρκαγιάς σε κλίμακα 0-100%.`;
+        } else if (currentLanguage === 'en') {
+          message = `🔥 ${tr.dangerTitle}\n\nCurrent Score: ${hazardPct}%\n\nThis index combines:\n• Terrain slope (fire spread acceleration)\n• Fuel characteristics (combustibility)\n• Weather conditions (ignition potential)\n• Topographic effects (microclimate)\n\nThe ${hazardPct}% score shows relative fire hazard intensity on a 0-100% scale.`;
+        } else if (currentLanguage === 'es') {
+          message = `🔥 ${tr.dangerTitle}\n\nPuntuación Actual: ${hazardPct}%\n\nEste índice combina:\n• Pendiente del terreno (aceleración de propagación)\n• Características del combustible (combustibilidad)\n• Condiciones meteorológicas (potencial de ignición)\n• Efectos topográficos (microclima)\n\nLa puntuación del ${hazardPct}% muestra la intensidad relativa del peligro de incendio en una escala de 0-100%.`;
+        } else if (currentLanguage === 'it') {
+          message = `🔥 ${tr.dangerTitle}\n\nPunteggio Attuale: ${hazardPct}%\n\nQuesto indice combina:\n• Pendenza del terreno (aceleración propagazione)\n• Caratteristiche del combustibile (combustibilità)\n• Condizioni meteorologiche (potenziale di accensione)\n• Effetti topografici (microclima)\n\nIl punteggio del ${hazardPct}% mostra l'intensità relativa del pericolo de incendio su una scala 0-100%.`;
+        }
+
+        showCustomAlert(tr.infoTitle, message);
+      });
+
+      document.getElementById('exposure-title').addEventListener('click', () => {
+        const tr = translations[currentLanguage];
+        const exposurePct = Math.round(computeExposureScore() * 100);
+
+        let message = '';
+        if (currentLanguage === 'el') {
+          message = `🏘️ ${tr.exposureTitle}\n\nΤρέχον Score: ${exposurePct}%\n\nΑυτός ο δείκτης αξιολογεί:\n• Πυκνότητα πληθυσμού και κτηρίων\n• Παρουσία κρίσιμων υποδομών\n• Εγγύτητα σε οικισμούς\n• Οικονομικά περιουσιακά στοιχεία σε κίνδυνο\n\nΤο ποσοστό ${exposurePct}% δείχνει το επίπεδο έκθεσης σε κλίμακα 0-100%.`;
+        } else if (currentLanguage === 'en') {
+          message = `🏘️ ${tr.exposureTitle}\n\nCurrent Score: ${exposurePct}%\n\nThis index evaluates:\n• Population and building density\n• Critical infrastructure presence\n• Proximity to settlements\n• Economic assets at risk\n\nThe ${exposurePct}% score shows exposure level on a 0-100% scale.`;
+        } else if (currentLanguage === 'es') {
+          message = `🏘️ ${tr.exposureTitle}\n\nPuntuación Actual: ${exposurePct}%\n\nEste índice evalúa:\n• Densidad de población y edificios\n• Presencia de infraestructura crítica\n• Proximidad a asentamientos\n• Activos económicos en riesgo\n\nLa puntuación del ${exposurePct}% muestra el nivel de exposición en una escala de 0-100%.`;
+        } else if (currentLanguage === 'it') {
+          message = `🏘️ ${tr.exposureTitle}\n\nPunteggio Attuale: ${exposurePct}%\n\nQuesto indice valuta:\n• Densità di popolazione e edifici\n• Presenza di infrastrutture critiche\n• Prossimità agli insediamenti\n• Beni economici a rischio\n\nIl punteggio del ${exposurePct}% mostra il livello di esposizione su una scala 0-100%.`;
+        }
+
+        showCustomAlert(tr.infoTitle, message);
+      });
+
+      document.getElementById('vulnerability-title').addEventListener('click', () => {
+        const tr = translations[currentLanguage];
+        const vulnPct = Math.round(computeVulnerabilityScore() * 100);
+
+        let message = '';
+        if (currentLanguage === 'el') {
+          message = `🛡️ ${tr.vulnTitle}\n\nΤρέχον Score: ${vulnPct}%\n\nΑυτός ο δείκτης εκτιμά:\n• Ικανότητα έκτακτης ανάγκης\n• Ανθεκτικότητα υποδομών\n• Κοινωνικούς παράγοντες τρωτότητας\n• Προσαρμοστική ικανότητα\n\nΤο ποσοστό ${vulnPct}% δείχνει το επίπεδο τρωτότητας σε κλίμακα 0-100%.`;
+        } else if (currentLanguage === 'en') {
+          message = `🛡️ ${tr.vulnTitle}\n\nCurrent Score: ${vulnPct}%\n\nThis index assesses:\n• Emergency response capacity\n• Infrastructure resilience\n• Social vulnerability factors\n• Adaptive capacity\n\nThe ${vulnPct}% score shows vulnerability level on a 0-100% scale.`;
+        } else if (currentLanguage === 'es') {
+          message = `🛡️ ${tr.vulnTitle}\n\nPuntuación Actual: ${vulnPct}%\n\nEste índice evalúa:\n• Capacidad de respuesta de emergencia\n• Resistencia de infraestructura\n• Factores de vulnerabilidad social\n• Capacidad adaptativa\n\nLa puntuación del ${vulnPct}% muestra el nivel de vulnerabilidad en una escala de 0-100%.`;
+        } else if (currentLanguage === 'it') {
+          message = `🛡️ ${tr.vulnTitle}\n\nPunteggio Attuale: ${vulnPct}%\n\nQuesto indice valuta:\n• Capacità di risposta di emergenza\n• Resilienza delle infrastrutture\n• Fattori di vulnerabilità sociale\n• Capacità adattiva\n\nIl punteggio del ${vulnPct}% mostra il livello di vulnerabilità su una scala 0-100%.`;
+        }
+
+        showCustomAlert(tr.infoTitle, message);
+      });
+
+      document.getElementById('ignition-title').addEventListener('click', () => {
+        const tr = translations[currentLanguage];
+        const ignitionPct = Math.round(computeIgnitionProbability() * 100);
+
+        let message = '';
+        if (currentLanguage === 'el') {
+          message = `⚡ ${tr.ignitionTitle}\n\nΤρέχον Score: ${ignitionPct}%\n\nΑυτή η πιθανότητα εξετάζει:\n• Υγρασία και τύπο καυσίμων\n• Καιρικές συνθήκες\n• Ανθρωπογενή δραστηριότητα (WUI exposure)\n• Ιστορικά πρότυπα ανάφλεξης\n\nΤο ποσοστό ${ignitionPct}% δείχνει την πιθανότητα έναρξης πυρκαγιάς σε κλίμακα 0-100%.`;
+        } else if (currentLanguage === 'en') {
+          message = `⚡ ${tr.ignitionTitle}\n\nCurrent Score: ${ignitionPct}%\n\nThis probability considers:\n• Fuel moisture and type\n• Weather conditions\n• Human activity (WUI exposure)\n• Historical ignition patterns\n\nThe ${ignitionPct}% score shows fire initiation likelihood on a 0-100% scale.`;
+        } else if (currentLanguage === 'es') {
+          message = `⚡ ${tr.ignitionTitle}\n\nPuntuación Actual: ${ignitionPct}%\n\nEsta probabilidad considera:\n• Humedad y tipo de combustible\n• Condiciones meteorológicas\n• Actividad humana (exposición WUI)\n• Patrones históricos de ignición\n\nLa puntuación del ${ignitionPct}% muestra la probabilidad de inicio de incendio en una escala de 0-100%.`;
+        } else if (currentLanguage === 'it') {
+          message = `⚡ ${tr.ignitionTitle}\n\nPunteggio Attuale: ${ignitionPct}%\n\nQuesta probabilità considera:\n• Umidità e tipo di combustibile\n• Condizioni meteorologiche\n• Attività umana (esposizione WUI)\n• Modelli storici di accensione\n\nIl punteggio del ${ignitionPct}% mostra la probabilità di inizio incendio su una scala 0-100%.`;
+        }
+
+        showCustomAlert(tr.infoTitle, message);
+      });
+
+      document.getElementById('propagation-title').addEventListener('click', () => {
+        const tr = translations[currentLanguage];
+        const spreadPct = Math.round(computeFireSpreadPotential() * 100);
+
+        let message = '';
+        if (currentLanguage === 'el') {
+          message = `🌋 ${tr.propagationTitle}\n\nΤρέχον Score: ${spreadPct}%\n\nΑυτό το δυναμικό αξιολογεί:\n• Επιδράσεις εδάφους στη συμπεριφορά πυρκαγιάς\n• Συνέχεια και φορτίο καυσίμων\n• Μετεωρολογικούς οδηγούς\n• Δυσκολία κατάσβεσης\n\nΤο ποσοστό ${spreadPct}% δείχνει το δυναμικό εξάπλωσης σε κλίμακα 0-100%.`;
+        } else if (currentLanguage === 'en') {
+          message = `🌋 ${tr.propagationTitle}\n\nCurrent Score: ${spreadPct}%\n\nThis potential evaluates:\n• Terrain effects on fire behavior\n• Fuel continuity and load\n• Meteorological drivers\n• Suppression difficulty\n\nThe ${spreadPct}% score shows fire spread potential on a 0-100% scale.`;
+        } else if (currentLanguage === 'es') {
+          message = `🌋 ${tr.propagationTitle}\n\nPuntuación Actual: ${spreadPct}%\n\nEste potencial evalúa:\n• Efectos del terreno en el comportamiento del fuego\n• Continuidad y carga de combustible\n• Impulsores meteorológicos\n• Dificultad de supresión\n\nLa puntuación del ${spreadPct}% muestra el potencial de propagación del fuego en una escala de 0-100%.`;
+        } else if (currentLanguage === 'it') {
+          message = `🌋 ${tr.propagationTitle}\n\nPunteggio Attuale: ${spreadPct}%\n\nQuesto potenziale valuta:\n• Effetti del terreno sul comportamento del fuoco\n• Continuità e carico di combustibile\n• Fattori meteorologici\n• Difficoltà di soppressione\n\nIl punteggio del ${spreadPct}% mostra il potenziale di propagazione del fuoco su una scala 0-100%.`;
+        }
+
+        showCustomAlert(tr.infoTitle, message);
+      });
+
+      document.getElementById('risk-title').addEventListener('click', () => {
+        const tr = translations[currentLanguage];
+        const riskPct = Math.round(computeIntegratedRisk() * 100);
+        const weights = normalizeWeights();
+
+        let weightInfo = '';
+        if (currentLanguage === 'el') {
+          weightInfo = `Τρέχοντα Βάρη:\n• Κίνδυνος: ${Math.round(weights.hazard*100)}%\n• Έκθεση: ${Math.round(weights.exposure*100)}%\n• Τρωτότητα: ${Math.round(weights.vulnerability*100)}%\n• Ανάφλεξη: ${Math.round(weights.ignition*100)}%\n• Εξάπλωση: ${Math.round(weights.propagation*100)}%\n\n`;
+        } else if (currentLanguage === 'en') {
+          weightInfo = `Current Weights:\n• Hazard: ${Math.round(weights.hazard*100)}%\n• Exposure: ${Math.round(weights.exposure*100)}%\n• Vulnerability: ${Math.round(weights.vulnerability*100)}%\n• Ignition: ${Math.round(weights.ignition*100)}%\n• Spread: ${Math.round(weights.propagation*100)}%\n\n`;
+        } else if (currentLanguage === 'es') {
+          weightInfo = `Pesos Actuales:\n• Peligro: ${Math.round(weights.hazard*100)}%\n• Exposición: ${Math.round(weights.exposure*100)}%\n• Vulnerabilidad: ${Math.round(weights.vulnerability*100)}%\n• Ignición: ${Math.round(weights.ignition*100)}%\n• Propagación: ${Math.round(weights.propagation*100)}%\n\n`;
+        } else if (currentLanguage === 'it') {
+          weightInfo = `Pesi Attuali:\n• Pericolo: ${Math.round(weights.hazard*100)}%\n• Esposizione: ${Math.round(weights.exposure*100)}%\n• Vulnerabilità: ${Math.round(weights.vulnerability*100)}%\n• Innesco: ${Math.round(weights.ignition*100)}%\n• Propagazione: ${Math.round(weights.propagation*100)}%\n\n`;
+        }
+
+        let message = '';
+        if (currentLanguage === 'el') {
+          message = `⚠️ ${tr.riskTitle}\n\nΤρέχον Score: ${riskPct}%\n\n${weightInfo}Αυτή η ολοκληρωμένη εκτίμηση συνδυάζει:\n• Δυναμικό κινδύνου πυρκαγιάς\n• Δυναμική συμπεριφορά πυρκαγιάς\n• Ανθρώπινη έκθεση & τρωτότητα\n\nΤο ποσοστό ${riskPct}% αντιπροσωπεύει το συνολικό επίπεδο κινδύνου για σχεδιασμό έκτακτης ανάγκης.`;
+        } else if (currentLanguage === 'en') {
+          message = `⚠️ ${tr.riskTitle}\n\nCurrent Score: ${riskPct}%\n\n${weightInfo}This comprehensive assessment combines:\n• Fire hazard potential\n• Dynamic fire behavior\n• Human exposure & vulnerability\n\nThe ${riskPct}% score represents overall wildfire risk for emergency planning.`;
+        } else if (currentLanguage === 'es') {
+          message = `⚠️ ${tr.riskTitle}\n\nPuntuación Actual: ${riskPct}%\n\n${weightInfo}Esta evaluación integral combina:\n• Potencial de peligro de incendio\n• Comportamiento dinámico del fuego\n• Exposición y vulnerabilidad humana\n\nLa puntuación del ${riskPct}% representa el riesgo general de incendio forestal para planificación de emergencia.`;
+        } else if (currentLanguage === 'it') {
+          message = `⚠️ ${tr.riskTitle}\n\nPunteggio Attuale: ${riskPct}%\n\n${weightInfo}Questa valutazione integrata combina:\n• Potenziale di pericolo di incendio\n• Comportamento dinamico del fuoco\n• Esposizione e vulnerabilità umana\n\nIl punteggio del ${riskPct}% mostra il rischio generale di incendio boschivo per pianificazione di emergenza.`;
+        }
+
+        showCustomAlert(tr.infoTitle, message);
+      });
+    }
+
+    /**********************************************
+     * 9) INITIALIZATION
+    **********************************************/
+
+    langSelect.addEventListener('change', () => {
+      currentLanguage = langSelect.value;
+      updateLanguage();
+      updateBars();
+    });
+
+    // Add all event listeners including weight controls
+    const allControls = [
+      slopeSlider, moistureSlider, elevSlider, windSlider,
+      bldSlider, popSlider, dsSettSlider, roadAccessSlider,
+      aspectSelect, fuelSelect, infrastructureSelect,
+      emergencySelect, strucSelect, waterSelect, socioVulnSlider
+    ];
+
+    // Add weight controls - these now trigger normalizeWeights with the changed slider
+    const weightControls = [
+      hazardWeightSlider, exposureWeightSlider,
+      vulnWeightSlider, ignitionWeightSlider, propagationWeightSlider
+    ];
+
+    allControls.forEach(el => {
+      if (el) el.addEventListener('input', updateBars);
+    });
+
+    weightControls.forEach(el => {
+      if (el) el.addEventListener('input', updateBars);
+    });
+
+    // Initialize the application
+    updateLanguage();
+    setupClickHandlers();
+    updateBars();
+  </script>
+</body>
+</html>

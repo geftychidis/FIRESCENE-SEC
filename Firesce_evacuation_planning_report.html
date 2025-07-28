@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRESCENE Wildfire Evacuation Planning Methodology Report</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            max-width: 8.5in;
+            margin: 1in auto;
+            padding: 0;
+            color: #000;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2em;
+            page-break-after: avoid;
+        }
+        
+        .title {
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.5em;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.5em;
+        }
+        
+        .project-context {
+            font-style: italic;
+            font-size: 11pt;
+            margin-bottom: 1em;
+        }
+        
+        h1 {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 2em;
+            margin-bottom: 1em;
+            border-bottom: 2px solid #000;
+            padding-bottom: 0.5em;
+            page-break-after: avoid;
+        }
+        
+        h2 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+            page-break-after: avoid;
+        }
+        
+        p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+        
+        .formula {
+            text-align: center;
+            font-weight: bold;
+            margin: 1.5em 0;
+            padding: 1em;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            font-size: 11pt;
+        }
+        
+        .formula-block {
+            margin: 1.5em 0;
+            padding: 1em;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        
+        .formula-title {
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            page-break-inside: avoid;
+        }
+        
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .center {
+            text-align: center;
+        }
+        
+        ul {
+            margin-bottom: 1em;
+        }
+        
+        li {
+            margin-bottom: 0.3em;
+        }
+        
+        .key-questions {
+            background-color: #fff3cd;
+            padding: 1em;
+            border-left: 4px solid #ffc107;
+            margin: 1em 0;
+        }
+        
+        .key-questions ul {
+            margin: 0;
+            padding-left: 1.5em;
+        }
+        
+        .parameters-section {
+            background-color: #e7f3ff;
+            padding: 1em;
+            border-left: 4px solid #0066cc;
+            margin: 1em 0;
+        }
+        
+        .workflow {
+            background-color: #f8f9fa;
+            padding: 1em;
+            border-left: 4px solid #007bff;
+            margin: 1em 0;
+        }
+        
+        .workflow-title {
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+        
+        .workflow ol {
+            margin: 0;
+            padding-left: 1.5em;
+        }
+        
+        .workflow li {
+            margin-bottom: 0.5em;
+        }
+        
+        .separator {
+            border-top: 1px solid #ccc;
+            margin: 2em 0;
+        }
+        
+        .outputs-list {
+            background-color: #f0f8f0;
+            padding: 1em;
+            border-left: 4px solid #28a745;
+        }
+        
+        .outputs-list ul {
+            margin: 0;
+            padding-left: 1.5em;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                font-size: 11pt;
+            }
+            .separator {
+                page-break-before: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Scientific-Technical Report</div>
+        <div class="subtitle">Wildfire Evacuation Planning Methodology</div>
+        <div class="project-context">FIRESCENE Project – Evacuation Module</div>
+    </div>
+
+    <h1>1. Overview</h1>
+    <p>The wildfire evacuation module of the FIRESCENE project provides a scenario-based, parameter-driven approach to estimate evacuation requirements, population dynamics, and associated resource needs for defined risk zones. This tool supports strategic emergency preparedness and response planning for wildfires in WUI areas, aligning with the broader goal of enhancing situational awareness, risk-informed contingency planning, and evacuation coordination under the UCPM framework.</p>
+    
+    <p>It operationalizes a simplified but dynamic model to calculate population distribution, evacuee profiles, transportation timelines, and shelter requirements for wildfire-prone areas. The system supports real-time configuration of demographic and logistic parameters, offering decision-support outputs for local Civil Protection authorities.</p>
+
+    <div class="separator"></div>
+
+    <h1>2. Methodological Framework</h1>
+    
+    <p>The module is designed to answer critical operational planning questions:</p>
+    
+    <div class="key-questions">
+        <ul>
+            <li>How many people must be evacuated under a given scenario?</li>
+            <li>What are their demographic profiles and vulnerabilities?</li>
+            <li>How fast can they be mobilized to safety?</li>
+            <li>What is the capacity gap in terms of sheltering and transport?</li>
+        </ul>
+    </div>
+    
+    <p>The system assumes zone-based population segmentation and evacuation timelines based on preconfigured parameters. These parameters can be adjusted through the user interface.</p>
+
+    <div class="separator"></div>
+
+    <h1>3. Core Input Parameters and Definitions</h1>
+    
+    <p>Users provide inputs to simulate different evacuation scenarios. Parameters are grouped into the following dimensions:</p>
+
+    <h2>3.1. Demographic Structure</h2>
+    
+    <div class="parameters-section">
+        <p><strong>Total Zone Population (P):</strong> Number of people within the evacuation area (can be user-entered).</p>
+        
+        <p><strong>Age Distribution:</strong></p>
+        <ul>
+            <li>Children (&lt;12): %</li>
+            <li>Adults (13–60): %</li>
+            <li>Elderly (&gt;60): %</li>
+            <li><em>(Sum must equal 100% – interface logic ensures dependency across categories)</em></li>
+        </ul>
+        
+        <p><strong>Gender Distribution:</strong></p>
+        <ul>
+            <li>% Male</li>
+            <li>% Female</li>
+            <li><em>(Mutually linked to sum to 100%)</em></li>
+        </ul>
+        
+        <p><strong>Vulnerable Groups:</strong></p>
+        <ul>
+            <li>% of population with limited mobility, disabilities, or cognitive impairments (e.g., elderly, tourists, medically fragile).</li>
+        </ul>
+    </div>
+
+    <h2>3.2. Population Behavior & Evacuation Logic</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+                <th>Units/Range</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Compliance Rate</td>
+                <td>Proportion of population likely to follow evacuation orders</td>
+                <td>Percentage (%)</td>
+            </tr>
+            <tr>
+                <td>Self-Evacuation</td>
+                <td>% of population with own means to evacuate</td>
+                <td>Percentage (%)</td>
+            </tr>
+            <tr>
+                <td>Assisted Evacuation</td>
+                <td>% requiring external transport (e.g., buses)</td>
+                <td>Percentage (%)</td>
+            </tr>
+            <tr>
+                <td>Sheltering In Place</td>
+                <td>% not evacuated but sheltering in defensible structures</td>
+                <td>Percentage (%)</td>
+            </tr>
+            <tr>
+                <td>Avg Speed to Assembly Points</td>
+                <td>Influences overall time-to-safety</td>
+                <td>km/h</td>
+            </tr>
+            <tr>
+                <td>Avg Distance to Assembly Points</td>
+                <td>Used with speed to estimate travel time</td>
+                <td>km</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3.3. Shelter and Transport Logistics</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+                <th>Application</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Shelter Capacity</td>
+                <td>Number of evacuees that can be hosted in formal shelters</td>
+                <td>Within or outside the zone</td>
+            </tr>
+            <tr>
+                <td>Transport Units Required</td>
+                <td>Based on evacuees without self-evacuation capacity</td>
+                <td>Vehicle capacity assumptions (typically buses)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="separator"></div>
+
+    <h1>4. Calculation Methodology</h1>
+    
+    <p>Once the parameters are entered or adjusted, the system computes the following key metrics:</p>
+
+    <h2>4.1. Effective Evacuee Population (E)</h2>
+    <div class="formula-block">
+        <div class="formula-title">Formula:</div>
+        <div class="formula">E = P · (Compliance Rate) − (Sheltering in Place Population)</div>
+    </div>
+
+    <h2>4.2. Evacuees Requiring Assistance (A)</h2>
+    <div class="formula-block">
+        <div class="formula-title">Formula:</div>
+        <div class="formula">A = E · (Assisted Evacuation Share)</div>
+    </div>
+
+    <h2>4.3. Time to Assembly (T<sub>a</sub>)</h2>
+    <div class="formula-block">
+        <div class="formula-title">Formula:</div>
+        <div class="formula">T<sub>a</sub> = Average Distance to Assembly Point (km) / Average Speed (km/h)</div>
+    </div>
+
+    <h2>4.4. Shelter Gap (SG)</h2>
+    <div class="formula-block">
+        <div class="formula-title">Formula:</div>
+        <div class="formula">SG = max(0, E − Available Shelter Capacity)</div>
+        <p><em>This figure identifies whether additional shelter facilities are needed or if current infrastructure suffices.</em></p>
+    </div>
+
+    <h2>4.5. Transport Vehicle Needs (TVN)</h2>
+    <div class="formula-block">
+        <div class="formula-title">Formula:</div>
+        <div class="formula">TVN = ⌈A / Average Bus Capacity (default assumed = 50)⌉</div>
+    </div>
+
+    <div class="separator"></div>
+
+    <h1>5. System Outputs</h1>
+    
+    <div class="outputs-list">
+        <p><strong>The interface delivers:</strong></p>
+        <ul>
+            <li>A bar chart representing evacuee groups and their needs</li>
+            <li>Pop-up explanations for computed evacuation dynamics</li>
+            <li>Risk-informed decision support visualizations for planners</li>
+            <li>Downloadable summary report (if working correctly) for documentation</li>
+        </ul>
+    </div>
+
+    <h2>5.1. Classification and Visualization</h2>
+    <ul>
+        <li><strong>Vulnerability Distribution:</strong> Shown as color-coded bars</li>
+        <li><strong>Assembly Travel Time:</strong> Converted into total evacuation timeline estimates</li>
+        <li><strong>Capacity Gaps:</strong> Flagged for contingency planning (e.g., shelter expansion or bus requisition)</li>
+        <li><strong>Dynamic Results:</strong> Scenario-sensitive and change dynamically with slider input</li>
+    </ul>
+
+    <div class="separator"></div>
+
+    <h1>6. Spatial Integration and GIS Applications</h1>
+    
+    <p>While the interface operates at the zone scale, the same logic can be extended spatially by:</p>
+    
+    <div class="workflow">
+        <div class="workflow-title">GIS Extension Workflow:</div>
+        <ol>
+            <li>Mapping demographic distributions via census data</li>
+            <li>Estimating travel time surfaces to assembly points using road network data</li>
+            <li>Overlaying shelter locations and capacity constraints</li>
+            <li>Generating zonal evacuation plans and time-constrained routing scenarios</li>
+        </ol>
+    </div>
+    
+    <p>This approach allows evacuation plans to be grounded in real topography, infrastructure, and mobility data.</p>
+
+    <div class="separator"></div>
+
+    <h1>7. Operational Applications</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Application Area</th>
+                <th>Use Case Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Preparedness Exercises</td>
+                <td>Estimate shelter capacity in summer influx</td>
+            </tr>
+            <tr>
+                <td>Evacuation Time Profiling</td>
+                <td>Rapid zones vs delayed zones classification</td>
+            </tr>
+            <tr>
+                <td>Transport Planning</td>
+                <td>Optimize bus fleet sizing and route staging</td>
+            </tr>
+            <tr>
+                <td>Vulnerability Reduction</td>
+                <td>Targeted support for elderly/tourist-rich areas</td>
+            </tr>
+            <tr>
+                <td>Multi-Zone Planning</td>
+                <td>Compare scenarios across municipalities</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="separator"></div>
+
+    <h1>8. Conclusion</h1>
+    
+    <p>The Firescene evacuation tool provides a transparent, modular, and user-configurable evacuation estimation framework tailored for wildfire-prone WUI areas. It translates critical demographic and behavioral factors into operational planning indicators, offering Civil Protection authorities a lightweight yet effective platform for proactive evacuation strategy design.</p>
+    
+    <p>It complements the integrated wildfire risk index module by transitioning from risk understanding to response preparedness, supporting the full continuum of disaster risk management as promoted in the Firescene project.</p>
+
+</body>
+</html>
