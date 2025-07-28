@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRESCENE Pro - Report Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .fire-gradient { background: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02); }
+        .safe-zone { background: radial-gradient(circle, #10b981, #059669); }
+        .danger-zone { background: radial-gradient(circle, #ef4444, #dc2626); }
+        .warning-zone { background: radial-gradient(circle, #f59e0b, #d97706); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        .alert-success { background-color: #d1fae5; color: #065f46; border-color: #10b981; }
+        .alert-warning { background-color: #fef3c7; color: #92400e; border-color: #f59e0b; }
+        .alert-danger { background-color: #fee2e2; color: #991b1b; border-color: #ef4444; }
+        .alert-info { background-color: #dbeafe; color: #1e40af; border-color: #3b82f6; }
+        /* Styles copied from firegem5.html for header and footer logos */
+        .header-right-logo {
+            max-height: 50px; /* Adjust as needed */
+            width: auto;
+        }
+        .footer-logos { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .footer-logo-img { max-height: 50px; width: auto; object-fit: contain; } /* Style for footer images */
+        .footer-partners-logo { max-height: 50px; width: auto; object-fit: contain; } /* Specific style for partners logo to fit */
+        .footer-link { color: #1e40af; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .footer-link:hover { text-decoration: underline; color: #1d4ed8; }
+        .footer-container { background: linear-gradient(to right, #f8fafc, #e2e8f0); border-top: 3px solid #dc2626; }
+        @media (max-width: 768px) {
+            .footer-logos { flex-direction: column; text-align: center; }
+            .footer-logo-img, .footer-partners-logo { max-height: 40px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <header class="bg-gradient-to-r from-red-600 to-orange-600 text-white p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white text-red-600 p-2 rounded-full">
+                    🔥
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">FIRESCENE Pro</h1>
+                    <p class="text-red-100" id="headerSubtitle">Report Viewer - Evacuation Analysis</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="printReport" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded font-semibold transition-colors">
+                    🖨️ Print Report
+                </button>
+                <img src="firescene_logo.png" alt="FIRESCENE Logo" class="header-right-logo">
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-4 flex-grow">
+        <div id="uploadSection" class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800" id="loadReportTitle">📁 Load FIRESCENE Report</h2>
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <input type="file" id="fileInput" accept=".json" class="hidden">
+                <div id="dropZone" class="cursor-pointer">
+                    <div class="text-4xl mb-4">📊</div>
+                    <p class="text-lg font-semibold text-gray-700 mb-2" id="clickBrowseText">Click to browse or drag & drop your report</p>
+                    <p class="text-sm text-gray-500" id="supportsJsonText">Supports JSON files exported from FIRESCENE Pro</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportContent" class="hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800" id="reportAnalysisTitle">📋 Evacuation Report Analysis</h2>
+                        <p id="reportTimestamp" class="text-gray-600"></p>
+                    </div>
+                    <div id="reportLanguage" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-600" id="totalPopulation">-</div>
+                        <div class="text-sm text-blue-800" id="totalPopulationLabel">Total Population</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-green-600" id="evacuatedCount">-</div>
+                        <div class="text-sm text-green-800" id="evacuatedCountLabel">Successfully Evacuated</div>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-yellow-600" id="evacuationTime">-</div>
+                        <div class="text-sm text-yellow-800" id="evacuationTimeLabel">Total Evacuation Time</div>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-red-600" id="maxRiskCount">-</div>
+                        <div class="text-sm text-red-800" id="maxRiskCountLabel">Peak Risk Count</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" id="simulationParametersTitle">⚙️ Simulation Parameters</h3>
+                    <div class="space-y-3" id="parametersSection">
+                        </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" id="finalResultsTitle">📊 Final Results</h3>
+                    <div class="space-y-3" id="resultsSection">
+                        </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800" id="evacuationTimelineTitle">⏱️ Evacuation Timeline</h3>
+                <div class="h-64 mb-4">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-3" id="keyEventsTitle">🔄 Key Events</h4>
+                    <div id="eventsTimeline" class="space-y-2">
+                        </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800" id="alertAnalysisTitle">🚨 Alert Analysis</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="text-center p-3 bg-green-50 rounded">
+                        <div class="text-xl font-bold text-green-600" id="successAlerts">0</div>
+                        <div class="text-xs text-green-800" id="successLabel">Success</div>
+                    </div>
+                    <div class="text-center p-3 bg-yellow-50 rounded">
+                        <div class="text-xl font-bold text-yellow-600" id="warningAlerts">0</div>
+                        <div class="text-xs text-yellow-800" id="warningsLabel">Warnings</div>
+                    </div>
+                    <div class="text-center p-3 bg-red-50 rounded">
+                        <div class="text-xl font-bold text-red-600" id="dangerAlerts">0</div>
+                        <div class="text-xs text-red-800" id="criticalLabel">Critical</div>
+                    </div>
+                    <div class="text-center p-3 bg-blue-50 rounded">
+                        <div class="text-xl font-bold text-blue-600" id="infoAlerts">0</div>
+                        <div class="text-xs text-blue-800" id="infoLabel">Info</div>
+                    </div>
+                </div>
+
+                <div class="max-h-64 overflow-y-auto space-y-2" id="alertsTimeline">
+                    </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800" id="performanceAnalysisTitle">📈 Performance Analysis</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3" id="efficiencyMetricsTitle">Efficiency Metrics</h4>
+                        <div class="space-y-3" id="efficiencyMetrics">
+                            </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3" id="riskAssessmentTitle">Risk Assessment</h4>
+                        <div class="space-y-3" id="riskAssessment">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-container py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="footer-logos">
+                <div class="flex flex-col items-center space-y-2">
+                    <img src="eu_flag_funding.png" alt="EU Flag Funding" class="footer-logo-img">
+                </div>
+                
+                <div class="flex items-center">
+                    <img src="firescene_partners_logos.jpg" alt="FIRESCENE Partners" class="footer-partners-logo">
+                </div>
+                
+                <div class="flex items-center">
+                    <img src="eu_flag_funding.png" alt="DG ECHO" class="footer-logo-img">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let reportData = null;
+        let timelineChart = null;
+        let currentLanguage = 'en';
+
+        // Enhanced translation object with more comprehensive translations
+        const translations = {
+            el: {
+                reportViewer: "Προβολέας Αναφορών - Ανάλυση Εκκένωσης",
+                loadReport: "📁 Φόρτωση Αναφοράς FIRESCENE",
+                clickBrowse: "Κάντε κλικ για αναζήτηση ή σύρετε και αφήστε την αναφορά σας",
+                supportsJson: "Υποστηρίζει αρχεία JSON που εξήχθησαν από το FIRESCENE Pro",
+                reportAnalysis: "📋 Ανάλυση Αναφοράς Εκκένωσης",
+                generated: "Δημιουργήθηκε:",
+                totalPopulation: "Συνολικός Πληθυσμός",
+                successfullyEvacuated: "Επιτυχώς Εκκενωμένοι",
+                totalEvacuationTime: "Συνολικός Χρόνος Εκκένωσης",
+                peakRiskCount: "Μέγιστος Αριθμός σε Κίνδυνο",
+                simulationParameters: "⚙️ Παράμετροι Προσομοίωσης",
+                finalResults: "📊 Τελικά Αποτελέσματα",
+                evacuationTimeline: "⏱️ Χρονοδιάγραμμα Εκκένωσης",
+                keyEvents: "🔄 Κύρια Γεγονότα",
+                alertAnalysis: "🚨 Ανάλυση Ειδοποιήσεων",
+                success: "Επιτυχία",
+                warnings: "Προειδοποιήσεις",
+                critical: "Κρίσιμα",
+                info: "Πληροφορίες",
+                performanceAnalysis: "📈 Ανάλυση Απόδοσης",
+                efficiencyMetrics: "Μετρήσεις Αποδοτικότητας",
+                riskAssessment: "Αξιολόγηση Κινδύνου",
+                printReport: "🖨️ Εκτύπωση Αναφοράς",
+                evacuated: "Εκκενωμένοι",
+                atRisk: "Σε Κίνδυνο",
+                // Parameter labels
+                fireSpreadRate: "🔥 Ρυθμός Εξάπλωσης Φωτιάς",
+                windSpeed: "💨 Ταχύτητα Ανέμου",
+                windDirection: "🧭 Κατεύθυνση Ανέμου",
+                touristPercent: "🏖️ Ποσοστό Τουριστών",
+                vulnerablePercent: "⚠️ Ευάλωτες Ομάδες",
+                notificationTime: "📢 Χρόνος Ειδοποίησης",
+                preparationTime: "⏰ Χρόνος Προετοιμασίας",
+                evacuationSpeed: "🚶 Ταχύτητα Εκκένωσης",
+                // Results labels
+                totalSimulationTime: "⏱️ Συνολικός Χρόνος Προσομοίωσης",
+                evacuationEfficiency: "✅ Αποδοτικότητα Εκκένωσης",
+                evacuationRate: "🚶 Ρυθμός Εκκένωσης",
+                finalFireRadius: "🔥 Τελική Ακτίνα Φωτιάς",
+                peopleAtRisk: "⚠️ Άτομα σε Κίνδυνο",
+                // Performance metrics
+                preparationEfficiency: "Αποδοτικότητα Προετοιμασίας",
+                speedFactor: "Παράγοντας Ταχύτητας",
+                overallRiskLevel: "Συνολικό Επίπεδο Κινδύνου",
+                fireImpact: "Επίδραση Φωτιάς",
+                // Units
+                minutes: "λεπτά",
+                hours: "ώρες",
+                people: "άτομα",
+                peoplePerHour: "άτομα/ώρα",
+                kmRadius: "ακτίνα km"
+            },
+            en: {
+                reportViewer: "Report Viewer - Evacuation Analysis",
+                loadReport: "📁 Load FIRESCENE Report",
+                clickBrowse: "Click to browse or drag & drop your report",
+                supportsJson: "Supports JSON files exported from FIRESCENE Pro",
+                reportAnalysis: "📋 Evacuation Report Analysis",
+                generated: "Generated:",
+                totalPopulation: "Total Population",
+                successfullyEvacuated: "Successfully Evacuated",
+                totalEvacuationTime: "Total Evacuation Time",
+                peakRiskCount: "Peak Risk Count",
+                simulationParameters: "⚙️ Simulation Parameters",
+                finalResults: "📊 Final Results",
+                evacuationTimeline: "⏱️ Evacuation Timeline",
+                keyEvents: "🔄 Key Events",
+                alertAnalysis: "🚨 Alert Analysis",
+                success: "Success",
+                warnings: "Warnings",
+                critical: "Critical",
+                info: "Info",
+                performanceAnalysis: "📈 Performance Analysis",
+                efficiencyMetrics: "Efficiency Metrics",
+                riskAssessment: "Risk Assessment",
+                printReport: "🖨️ Print Report",
+                evacuated: "Evacuated",
+                atRisk: "At Risk",
+                // Parameter labels
+                fireSpreadRate: "🔥 Fire Spread Rate",
+                windSpeed: "💨 Wind Speed",
+                windDirection: "🧭 Wind Direction",
+                touristPercent: "🏖️ Tourist Percentage",
+                vulnerablePercent: "⚠️ Vulnerable Groups",
+                notificationTime: "📢 Notification Time",
+                preparationTime: "⏰ Preparation Time",
+                evacuationSpeed: "🚶 Evacuation Speed",
+                // Results labels
+                totalSimulationTime: "⏱️ Total Simulation Time",
+                evacuationEfficiency: "✅ Evacuation Efficiency",
+                evacuationRate: "🚶 Evacuation Rate",
+                finalFireRadius: "🔥 Final Fire Radius",
+                peopleAtRisk: "⚠️ People at Risk",
+                // Performance metrics
+                preparationEfficiency: "Preparation Efficiency",
+                speedFactor: "Speed Factor",
+                overallRiskLevel: "Overall Risk Level",
+                fireImpact: "Fire Impact",
+                // Units
+                minutes: "minutes",
+                hours: "hours",
+                people: "people",
+                peoplePerHour: "people/hour",
+                kmRadius: "km radius"
+            },
+            es: {
+                reportViewer: "Visor de Informes - Análisis de Evacuación",
+                loadReport: "📁 Cargar Informe FIRESCENE",
+                clickBrowse: "Haga clic para navegar o arrastre y suelte su informe",
+                supportsJson: "Admite archivos JSON exportados desde FIRESCENE Pro",
+                reportAnalysis: "📋 Análisis del Informe de Evacuación",
+                generated: "Generado:",
+                totalPopulation: "Población Total",
+                successfullyEvacuated: "Evacuados Exitosamente",
+                totalEvacuationTime: "Tiempo Total de Evacuación",
+                peakRiskCount: "Máximo Número en Riesgo",
+                simulationParameters: "⚙️ Parámetros de Simulación",
+                finalResults: "📊 Resultados Finales",
+                evacuationTimeline: "⏱️ Cronología de Evacuación",
+                keyEvents: "🔄 Eventos Clave",
+                alertAnalysis: "🚨 Análisis de Alertas",
+                success: "Éxito",
+                warnings: "Advertencias",
+                critical: "Crítico",
+                info: "Información",
+                performanceAnalysis: "📈 Análisis de Rendimiento",
+                efficiencyMetrics: "Métricas de Eficiencia",
+                riskAssessment: "Evaluación de Riesgo",
+                printReport: "🖨️ Imprimir Informe",
+                evacuated: "Evacuados",
+                atRisk: "En Riesgo",
+                // Parameter labels
+                fireSpreadRate: "🔥 Tasa de Propagación del Fuego",
+                windSpeed: "💨 Velocidad del Viento",
+                windDirection: "🧭 Dirección del Viento",
+                touristPercent: "🏖️ Porcentaje de Turistas",
+                vulnerablePercent: "⚠️ Grupos Vulnerables",
+                notificationTime: "📢 Tiempo de Notificación",
+                preparationTime: "⏰ Tiempo de Preparación",
+                evacuationSpeed: "🚶 Velocidad de Evacuación",
+                // Results labels
+                totalSimulationTime: "⏱️ Tiempo Total de Simulación",
+                evacuationEfficiency: "✅ Eficiencia de Evacuación",
+                evacuationRate: "🚶 Tasa de Evacuación",
+                finalFireRadius: "🔥 Radio Final del Fuego",
+                peopleAtRisk: "⚠️ Personas en Riesgo",
+                // Performance metrics
+                preparationEfficiency: "Eficiencia de Preparación",
+                speedFactor: "Factor de Velocidad",
+                overallRiskLevel: "Nivel General de Riesgo",
+                fireImpact: "Impacto del Fuego",
+                // Units
+                minutes: "minutos",
+                hours: "horas",
+                people: "personas",
+                peoplePerHour: "personas/hora",
+                kmRadius: "radio km"
+            }
+        };
+
+        // Wind direction translations
+        const windDirections = {
+            el: { N: "Βόρεια", NE: "Βορειοανατολικά", E: "Ανατολικά", SE: "Νοτιοανατολικά", S: "Νότια", SW: "Νοτιοδυτικά", W: "Δυτικά", NW: "Βορειοδυτικά" },
+            en: { N: "North", NE: "Northeast", E: "East", SE: "Southeast", S: "South", SW: "Southwest", W: "West", NW: "Northwest" },
+            es: { N: "Norte", NE: "Noreste", E: "Este", SE: "Sureste", S: "Sur", SW: "Suroeste", W: "Oeste", NW: "Noroeste" }
+        };
+
+        // Risk level translations
+        const riskLevels = {
+            el: { HIGH: "ΥΨΗΛΟΣ", MEDIUM: "ΜΕΤΡΙΟΣ", LOW: "ΧΑΜΗΛΟΣ" },
+            en: { HIGH: "HIGH", MEDIUM: "MEDIUM", LOW: "LOW" },
+            es: { HIGH: "ALTO", MEDIUM: "MEDIO", LOW: "BAJO" }
+        };
+
+        // Get translation
+        function t(key) {
+            return translations[currentLanguage] && translations[currentLanguage][key] 
+                ? translations[currentLanguage][key] 
+                : translations.en[key] || key;
+        }
+
+        // Update interface language
+        function updateLanguage() {
+            // Header
+            document.getElementById('headerSubtitle').textContent = t('reportViewer');
+            document.getElementById('printReport').innerHTML = t('printReport');
+            
+            // Upload section
+            document.getElementById('loadReportTitle').innerHTML = t('loadReport');
+            document.getElementById('clickBrowseText').textContent = t('clickBrowse');
+            document.getElementById('supportsJsonText').textContent = t('supportsJson');
+            
+            // Report section titles
+            document.getElementById('reportAnalysisTitle').innerHTML = t('reportAnalysis');
+            document.getElementById('totalPopulationLabel').textContent = t('totalPopulation');
+            document.getElementById('evacuatedCountLabel').textContent = t('successfullyEvacuated');
+            document.getElementById('evacuationTimeLabel').textContent = t('totalEvacuationTime');
+            document.getElementById('maxRiskCountLabel').textContent = t('peakRiskCount');
+            
+            document.getElementById('simulationParametersTitle').innerHTML = t('simulationParameters');
+            document.getElementById('finalResultsTitle').innerHTML = t('finalResults');
+            document.getElementById('evacuationTimelineTitle').innerHTML = t('evacuationTimeline');
+            document.getElementById('keyEventsTitle').innerHTML = t('keyEvents');
+            document.getElementById('alertAnalysisTitle').innerHTML = t('alertAnalysis');
+            document.getElementById('performanceAnalysisTitle').innerHTML = t('performanceAnalysis');
+            document.getElementById('efficiencyMetricsTitle').textContent = t('efficiencyMetrics');
+            document.getElementById('riskAssessmentTitle').textContent = t('riskAssessment');
+            
+            // Alert labels
+            document.getElementById('successLabel').textContent = t('success');
+            document.getElementById('warningsLabel').textContent = t('warnings');
+            document.getElementById('criticalLabel').textContent = t('critical');
+            document.getElementById('infoLabel').textContent = t('info');
+        }
+
+        // File handling
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const uploadSection = document.getElementById('uploadSection');
+        const reportContent = document.getElementById('reportContent');
+
+        // Click to browse
+        dropZone.addEventListener('click', () => {
+            console.log('Drop zone clicked - triggering file input');
+            fileInput.click();
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            console.log('File input changed:', e.target.files);
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            console.log('Drag over');
+            dropZone.classList.add('bg-blue-50', 'border-blue-300');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            console.log('Drag leave');
+            dropZone.classList.remove('bg-blue-50', 'border-blue-300');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            console.log('File dropped');
+            dropZone.classList.remove('bg-blue-50', 'border-blue-300');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        });
+
+        // Process uploaded file
+        function processFile(file) {
+            console.log('Processing file:', file.name);
+            if (!file.name.endsWith('.json')) {
+                alert('Please upload a JSON file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    console.log('File read successfully');
+                    reportData = JSON.parse(e.target.result);
+                    currentLanguage = reportData.language || 'en';
+                    console.log('Report language:', currentLanguage);
+                    updateLanguage();
+                    displayReport(reportData);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    alert('Error reading file: ' + error.message);
+                }
+            };
+            reader.onerror = () => {
+                console.error('Error reading file');
+                alert('Error reading file');
+            };
+            reader.readAsText(file);
+        }
+
+        // Display report
+        function displayReport(data) {
+            console.log('Displaying report');
+            uploadSection.style.display = 'none';
+            reportContent.style.display = 'block';
+
+            // Populate summary
+            document.getElementById('reportTimestamp').textContent = 
+                `${t('generated')} ${new Date(data.timestamp).toLocaleString()}`;
+            document.getElementById('reportLanguage').textContent = data.language.toUpperCase();
+            document.getElementById('totalPopulation').textContent = data.simulationParameters.totalPopulation.toLocaleString();
+            document.getElementById('evacuatedCount').textContent = data.results.evacuatedCount.toLocaleString();
+            document.getElementById('evacuationTime').textContent = 
+                `${Math.floor(data.results.currentTime / 60)}h ${data.results.currentTime % 60}m`;
+            document.getElementById('maxRiskCount').textContent = data.results.riskCount.toLocaleString();
+
+            // Populate sections
+            populateParameters(data.simulationParameters);
+            populateResults(data.results);
+            createTimelineChart(data);
+            populateEvents(data.events);
+            populateAlerts(data.alerts);
+            calculatePerformanceMetrics(data);
+        }
+
+        function populateParameters(params) {
+            const section = document.getElementById('parametersSection');
+            section.innerHTML = '';
+            
+            // Define parameter order and translations
+            const paramConfig = {
+                fireSpreadRate: { key: 'fireSpreadRate', unit: ' km/h' },
+                windSpeed: { key: 'windSpeed', unit: ' km/h' },
+                windDirection: { key: 'windDirection', unit: '' },
+                totalPopulation: { key: 'totalPopulation', unit: ` ${t('people')}` },
+                touristPercent: { key: 'touristPercent', unit: '%' },
+                vulnerablePercent: { key: 'vulnerablePercent', unit: '%' },
+                notificationTime: { key: 'notificationTime', unit: ` ${t('minutes')}` },
+                preparationTime: { key: 'preparationTime', unit: ` ${t('minutes')}` },
+                evacuationSpeed: { key: 'evacuationSpeed', unit: ' km/h' }
+            };
+
+            Object.entries(paramConfig).forEach(([paramKey, config]) => {
+                if (params.hasOwnProperty(paramKey)) {
+                    const value = params[paramKey];
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center py-2 border-b border-gray-100';
+                    
+                    let displayValue = value;
+                    if (paramKey === 'windDirection' && windDirections[currentLanguage]) {
+                        displayValue = windDirections[currentLanguage][value] || value;
+                    }
+                    
+                    div.innerHTML = `
+                        <span class="text-sm font-medium text-gray-600">${t(config.key)}</span>
+                        <span class="text-sm font-semibold text-gray-800">${displayValue}${config.unit}</span>
+                    `;
+                    section.appendChild(div);
+                }
+            });
+        }
+
+        function populateResults(results) {
+            const section = document.getElementById('resultsSection');
+            const efficiency = ((results.evacuatedCount / results.currentTime) * 60).toFixed(1);
+            
+            section.innerHTML = `
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-sm font-medium text-gray-600">${t('totalSimulationTime')}</span>
+                    <span class="text-sm font-semibold text-gray-800">${results.currentTime} ${t('minutes')}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-sm font-medium text-gray-600">${t('evacuationEfficiency')}</span>
+                    <span class="text-sm font-semibold text-green-600">${results.evacuationEfficiency.toFixed(1)}%</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-sm font-medium text-gray-600">${t('evacuationRate')}</span>
+                    <span class="text-sm font-semibold text-gray-800">${efficiency} ${t('peoplePerHour')}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-sm font-medium text-gray-600">${t('finalFireRadius')}</span>
+                    <span class="text-sm font-semibold text-red-600">${(results.fireRadius / 15).toFixed(1)} ${t('kmRadius')}</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-sm font-medium text-gray-600">${t('peopleAtRisk')}</span>
+                    <span class="text-sm font-semibold ${results.riskCount > 0 ? 'text-red-600' : 'text-green-600'}">${results.riskCount}</span>
+                </div>
+            `;
+        }
+
+        function createTimelineChart(data) {
+            const ctx = document.getElementById('timelineChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (timelineChart) {
+                timelineChart.destroy();
+            }
+            
+            const timelineData = [];
+            const riskData = [];
+            const evacuatedData = [];
+            
+            for (let time = 0; time <= data.results.currentTime; time += 10) {
+                const progress = time / data.results.currentTime;
+                const evacuated = Math.floor(data.results.evacuatedCount * Math.min(progress * 1.2, 1));
+                const atRisk = time > 60 ? Math.max(0, Math.floor((1 - progress) * 1000)) : 0;
+                
+                timelineData.push(`${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`);
+                evacuatedData.push(evacuated);
+                riskData.push(atRisk);
+            }
+
+            timelineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timelineData,
+                    datasets: [{
+                        label: t('evacuated'),
+                        data: evacuatedData,
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: t('atRisk'),
+                        data: riskData,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: true, position: 'top' } }
+                }
+            });
+        }
+
+        function populateEvents(events) {
+            const section = document.getElementById('eventsTimeline');
+            section.innerHTML = '';
+            
+            events.forEach(event => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start space-x-3 p-3 bg-blue-50 rounded';
+                
+                // Translate event content if it exists in the data
+                let eventTitle = event.event;
+                let eventDescription = event.description;
+                
+                // If the event data contains translations, use them
+                if (event.translations && event.translations[currentLanguage]) {
+                    eventTitle = event.translations[currentLanguage].event || eventTitle;
+                    eventDescription = event.translations[currentLanguage].description || eventDescription;
+                }
+                
+                div.innerHTML = `
+                    <div class="flex-shrink-0 w-16 text-xs font-mono text-blue-600">
+                        ${Math.floor(event.time/60)}:${(event.time%60).toString().padStart(2,'0')}
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm font-semibold text-blue-800">${eventTitle}</div>
+                        <div class="text-xs text-blue-600 mt-1">${eventDescription}</div>
+                    </div>
+                `;
+                section.appendChild(div);
+            });
+        }
+
+        function populateAlerts(alerts) {
+            const section = document.getElementById('alertsTimeline');
+            
+            const counts = { success: 0, warning: 0, danger: 0, info: 0 };
+            alerts.forEach(alert => counts[alert.type]++);
+            
+            document.getElementById('successAlerts').textContent = counts.success;
+            document.getElementById('warningAlerts').textContent = counts.warning;
+            document.getElementById('dangerAlerts').textContent = counts.danger;
+            document.getElementById('infoAlerts').textContent = counts.info;
+            
+            section.innerHTML = '';
+            alerts.slice(0, 20).forEach(alert => {
+                const div = document.createElement('div');
+                div.className = `flex items-start space-x-3 p-2 rounded border alert-${alert.type}`;
+                
+                // Translate alert message if translation exists
+                let alertMessage = alert.message;
+                if (alert.translations && alert.translations[currentLanguage]) {
+                    alertMessage = alert.translations[currentLanguage].message || alertMessage;
+                }
+                
+                div.innerHTML = `
+                    <div class="flex-shrink-0 w-16 text-xs font-mono">
+                        ${Math.floor(alert.time/60)}:${(alert.time%60).toString().padStart(2,'0')}
+                    </div>
+                    <div class="flex-1 text-xs">${alertMessage}</div>
+                `;
+                section.appendChild(div);
+            });
+        }
+
+        function calculatePerformanceMetrics(data) {
+            const efficiencySection = document.getElementById('efficiencyMetrics');
+            const riskSection = document.getElementById('riskAssessment');
+            
+            const evacuationRate = (data.results.evacuatedCount / data.results.currentTime * 60).toFixed(1);
+            const preparationEfficiency = ((data.simulationParameters.notificationTime + data.simulationParameters.preparationTime) / data.results.currentTime * 100).toFixed(1);
+            const speedFactor = (data.simulationParameters.evacuationSpeed / 3 * 100).toFixed(0);
+            
+            efficiencySection.innerHTML = `
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">${t('evacuationRate')}</span>
+                    <span class="text-sm font-semibold">${evacuationRate} ${t('peoplePerHour')}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">${t('preparationEfficiency')}</span>
+                    <span class="text-sm font-semibold">${preparationEfficiency}%</span>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-sm text-gray-600">${t('speedFactor')}</span>
+                    <span class="text-sm font-semibold">${speedFactor}%</span>
+                </div>
+            `;
+            
+            const riskLevel = data.results.riskCount > data.simulationParameters.totalPopulation * 0.2 ? 'HIGH' : 
+                            data.results.evacuationEfficiency > 80 ? 'LOW' : 'MEDIUM';
+            const riskColor = riskLevel === 'HIGH' ? 'text-red-600' : riskLevel === 'MEDIUM' ? 'text-yellow-600' : 'text-green-600';
+            const translatedRiskLevel = riskLevels[currentLanguage] ? riskLevels[currentLanguage][riskLevel] : riskLevel;
+            
+            riskSection.innerHTML = `
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">${t('overallRiskLevel')}</span>
+                    <span class="text-sm font-semibold ${riskColor}">${translatedRiskLevel}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">${t('peakRiskCount')}</span>
+                    <span class="text-sm font-semibold">${data.results.riskCount}</span>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-sm text-gray-600">${t('fireImpact')}</span>
+                    <span class="text-sm font-semibold">${(data.results.fireRadius / 15).toFixed(1)} ${t('kmRadius')}</span>
+                </div>
+            `;
+        }
+
+        // Print functionality
+        document.getElementById('printReport').addEventListener('click', () => {
+            if (!reportData) {
+                alert('No report loaded');
+                return;
+            }
+            window.print();
+        });
+
+        // Initialize
+        console.log('FIRESCENE Report Viewer initialized');
+        updateLanguage();
+
+        // Print styles
+        const printStyles = `
+            <style media="print">
+                body { margin: 0; }
+                header { background: #dc2626 !important; -webkit-print-color-adjust: exact; }
+                #uploadSection { display: none !important; }
+                .no-print { display: none !important; }
+                .bg-blue-50, .bg-green-50, .bg-yellow-50, .bg-red-50 { 
+                    -webkit-print-color-adjust: exact; 
+                }
+            </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', printStyles);
+    </script>
+</body>
+</html>

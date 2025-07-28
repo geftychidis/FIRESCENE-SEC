@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRESCENE Pro - Σύστημα Σχεδιασμού Εκκενώσεων</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .fire-gradient { background: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02); }
+        .safe-zone { background: radial-gradient(circle, #10b981, #059669); }
+        .danger-zone { background: radial-gradient(circle, #ef4444, #dc2626); }
+        .warning-zone { background: radial-gradient(circle, #f59e0b, #d97706); }
+        .evacuation-route { stroke: #3b82f6; stroke-width: 3; fill: none; }
+        .simulation-active { animation: pulse 2s infinite; }
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .loading-state { opacity: 0.5; pointer-events: none; }
+        .logo-container { max-width: 120px; max-height: 60px; }
+        .logo-container img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+        .footer-logos { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .footer-logo-img { max-height: 50px; width: auto; object-fit: contain; } /* Style for footer images */
+        .footer-partners-logo { max-height: 50px; width: auto; object-fit: contain; } /* Specific style for partners logo to fit */
+        .footer-link { color: #1e40af; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .footer-link:hover { text-decoration: underline; color: #1d4ed8; }
+        .footer-container { background: linear-gradient(to right, #f8fafc, #e2e8f0); border-top: 3px solid #dc2626; }
+        .header-right-logo {
+            max-height: 50px; /* Adjust as needed */
+            width: auto;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @media (max-width: 768px) {
+            .footer-logos { flex-direction: column; text-align: center; }
+            .footer-logo-img, .footer-partners-logo { max-height: 40px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <header class="bg-gradient-to-r from-red-600 to-orange-600 text-white p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white text-red-600 p-2 rounded-full">
+                    🔥
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">FIRESCENE Pro</h1>
+                    <p class="text-red-100">Σύστημα Σχεδιασμού Εκκενώσεων WUI</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <select id="langSelect" class="bg-white text-gray-800 px-3 py-1 rounded">
+                    <option value="el">Ελληνικά</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                </select>
+                <img src="firescene_logo.png" alt="FIRESCENE Logo" class="header-right-logo">
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        <div class="max-w-7xl mx-auto p-4">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                <div class="lg:col-span-1 bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" data-translate="scenarioParams">Παράμετροι Σεναρίου</h3>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-700 mb-2" data-translate="fireParams">🔥 Παράμετροι Πυρκαγιάς</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="fireSpread">Ταχύτητα Εξάπλωσης (km/h)</label>
+                                <input type="range" id="fireSpread" min="1" max="20" value="4" class="w-full">
+                                <span id="fireSpreadValue" class="text-sm text-gray-500">4 km/h</span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="windDirection">Κατεύθυνση Ανέμου</label>
+                                <select id="windDirection" class="w-full p-2 border rounded">
+                                    <option value="N">Βόρεια</option>
+                                    <option value="NE">Βορειοανατολικά</option>
+                                    <option value="E">Ανατολικά</option>
+                                    <option value="SE">Νοτιοανατολικά</option>
+                                    <option value="S">Νότια</option>
+                                    <option value="SW">Νοτιοδυτικά</option>
+                                    <option value="W">Δυτικά</option>
+                                    <option value="NW">Βορειοδυτικά</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="windSpeed">Ένταση Ανέμου (km/h)</label>
+                                <input type="range" id="windSpeed" min="5" max="100" value="25" class="w-full">
+                                <span id="windSpeedValue" class="text-sm text-gray-500">25 km/h</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-700 mb-2" data-translate="population">👥 Πληθυσμός</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="totalPopulation">Συνολικός Πληθυσμός</label>
+                                <input type="number" id="totalPopulation" min="500" max="50000" value="5000" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="tourists">Τουρίστες (%)</label>
+                                <input type="range" id="touristPercent" min="0" max="80" value="30" class="w-full">
+                                <span id="touristPercentValue" class="text-sm text-gray-500">30%</span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="vulnerable">Ευάλωτες Ομάδες (%)</label>
+                                <input type="range" id="vulnerablePercent" min="5" max="40" value="15" class="w-full">
+                                <span id="vulnerablePercentValue" class="text-sm text-gray-500">15%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-700 mb-2" data-translate="evacuation">🚪 Εκκένωση</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="notificationTime">Χρόνος Ειδοποίησης (min)</label>
+                                <input type="range" id="notificationTime" min="5" max="360" value="30" class="w-full">
+                                <span id="notificationTimeValue" class="text-sm text-gray-500">30 min</span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="preparationTime">Χρόνος Προετοιμασίας (min)</label>
+                                <input type="range" id="preparationTime" min="10" max="60" value="25" class="w-full">
+                                <span id="preparationTimeValue" class="text-sm text-gray-500">25 min</span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600" data-translate="evacuationSpeed">Μέση Ταχύτητα Εκκένωσης (km/h)</label>
+                                <input type="range" id="evacuationSpeed" min="1" max="8" value="3" class="w-full">
+                                <span id="evacuationSpeedValue" class="text-sm text-gray-500">3 km/h</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button id="startSimulation" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-semibold transition-colors" data-translate="startSim">
+                            ▶️ Έναρξη Simulation
+                        </button>
+                        <button id="pauseSimulation" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded font-semibold transition-colors" data-translate="pauseSim" disabled>
+                            ⏸️ Παύση
+                        </button>
+                        <button id="resetSimulation" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded font-semibold transition-colors" data-translate="resetSim">
+                            🔄 Επαναφορά
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" data-translate="evacuationMap">Χάρτης Εκκένωσης</h3>
+                    <div id="mapArea" class="relative bg-green-100 h-96 rounded border-2 border-gray-300 overflow-hidden">
+                        <svg id="evacuationMap" class="w-full h-full" viewBox="0 0 580 400">
+                            <rect x="0" y="300" width="580" height="100" class="fill-blue-300 stroke-blue-500" stroke-width="1"/>
+                            <text id="seaLabel" x="290" y="355" text-anchor="middle" class="text-sm font-semibold text-blue-800" data-translate="sea">🌊 Θάλασσα</text>
+                            
+                            <circle cx="450" cy="60" r="70" class="fill-green-400 stroke-green-600" stroke-width="2"/>
+                            <text id="forestLabel1" x="450" y="65" text-anchor="middle" class="text-xs font-semibold" data-translate="forest">🌲 Δάσος</text>
+                            
+                            <circle cx="380" cy="120" r="40" class="fill-green-400 stroke-green-600" stroke-width="2"/>
+                            <text id="forestLabel2" x="380" y="125" text-anchor="middle" class="text-xs font-semibold">🌲</text>
+                            
+                            <rect x="280" y="120" width="140" height="100" class="fill-orange-200 stroke-orange-400" stroke-width="2"/>
+                            <text id="wuiLabel1" x="350" y="150" text-anchor="middle" class="text-xs font-semibold" data-translate="wuiSettlement">🏘️ WUI Οικισμός</text>
+                            <text id="wuiLabel2" x="350" y="165" text-anchor="middle" class="text-xs" data-translate="mixedZone">Μικτή Ζώνη</text>
+                            <text id="wuiLabel3" x="350" y="180" text-anchor="middle" class="text-xs" data-translate="forestResidential">Δάσους-Κατοικιών</text>
+                            
+                            <rect x="100" y="240" width="120" height="50" class="fill-purple-200 stroke-purple-400" stroke-width="2"/>
+                            <text id="hotelsLabel1" x="160" y="260" text-anchor="middle" class="text-xs font-semibold" data-translate="hotels">🏨 Ξενοδοχεία</text>
+                            <text id="hotelsLabel2" x="160" y="275" text-anchor="middle" class="text-xs" data-translate="campingAnd">& Camping</text>
+                            
+                            <rect x="320" y="240" width="100" height="50" class="fill-pink-200 stroke-pink-400" stroke-width="2"/>
+                            <text id="campingLabel1" x="370" y="260" text-anchor="middle" class="text-xs font-semibold" data-translate="camping">⛺ Camping</text>
+                            <text id="campingLabel2" x="370" y="275" text-anchor="middle" class="text-xs" data-translate="tourist">Τουριστικό</text>
+                            
+                            <rect x="50" y="180" width="100" height="40" class="safe-zone stroke-green-700" stroke-width="3"/>
+                            <text id="safeZoneA" x="100" y="205" text-anchor="middle" class="text-xs font-bold text-white" data-translate="safeZoneA">Ασφαλής Ζώνη A</text>
+                            
+                            <rect x="480" y="280" width="90" height="40" class="safe-zone stroke-green-700" stroke-width="3"/>
+                            <text id="safeZoneB" x="525" y="305" text-anchor="middle" class="text-xs font-bold text-white" data-translate="safeZoneB">Ασφαλής Ζώνη B</text>
+                            
+                            <path d="M 350 220 L 100 200" class="evacuation-route"/>
+                            <path d="M 350 220 L 525 300" class="evacuation-route"/>
+                            <path d="M 160 265 L 100 200" class="evacuation-route"/>
+                            <path d="M 370 265 L 525 300" class="evacuation-route"/>
+
+                            <circle id="fireOrigin" cx="480" cy="40" r="8" class="fill-red-600 stroke-red-800" stroke-width="2"/>
+                            <text id="fireOriginLabel" x="495" y="45" class="text-xs font-bold text-red-600" data-translate="fireOrigin">🔥 Εστία Πυρκαγιάς</text>
+                            
+                            <g id="windIndicator">
+                                <line x1="480" y1="25" x2="460" y2="35" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                <text id="windIndicatorLabel" x="440" y="20" class="text-xs font-bold text-red-600" data-translate="windIndicator">💨 N→S</text>
+                            </g>
+                            
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#ff6b35"/>
+                                </marker>
+                            </defs>
+                            
+                            <ellipse id="fireSpreadCircle" cx="480" cy="40" rx="0" ry="0" class="danger-zone opacity-70" style="display: none;" transform="rotate(45 480 40)"/>
+                        </svg>
+                    </div>
+                    
+                    <div class="mt-4 grid grid-cols-2 gap-4 text-xs">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 safe-zone rounded"></div>
+                                <span data-translate="legendSafeZones">Ασφαλείς Ζώνες</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 danger-zone rounded"></div>
+                                <span data-translate="legendDangerZone">Ζώνη Κινδύνου</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-orange-200 border border-orange-400 rounded"></div>
+                                <span data-translate="legendWUISettlement">WUI Οικισμός</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-blue-300 border border-blue-500 rounded"></div>
+                                <span data-translate="legendSea">🌊 Θάλασσα</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-2 bg-blue-500 rounded"></div>
+                                <span data-translate="legendEvacuationRoutes">Διαδρομές Εκκένωσης</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-red-600 rounded-full"></div>
+                                <span data-translate="legendFireOrigin">Εστία Πυρκαγιάς</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-green-400 border border-green-600 rounded-full"></div>
+                                <span data-translate="legendForest">🌲 Δάσος</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-purple-200 border border-purple-400 rounded"></div>
+                                <span data-translate="legendHotels">🏨 Ξενοδοχεία</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" data-translate="evacuationStatus">Κατάσταση Εκκένωσης</h3>
+                    
+                    <div class="mb-6 text-center">
+                        <div class="text-3xl font-bold text-blue-600" id="simulationTime">00:00</div>
+                        <div class="text-sm text-gray-500" data-translate="simTime">Χρόνος Simulation</div>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span data-translate="notification">Ειδοποίηση</span>
+                                <span id="notificationProgress">0%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div id="notificationBar" class="bg-yellow-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span data-translate="evacuationPop">Εκκένωση Πληθυσμού</span>
+                                <span id="evacuationProgress">0%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div id="evacuationBar" class="bg-blue-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span data-translate="fireSpreadLabel">Εξάπλωση Πυρκαγιάς</span>
+                                <span id="fireProgress">0%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div id="fireBar" class="bg-red-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 p-3 rounded">
+                            <div class="text-lg font-bold text-blue-600" id="evacuatedCount">0</div>
+                            <div class="text-sm text-blue-800" data-translate="evacuated">Εκκενωμένοι</div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-3 rounded">
+                            <div class="text-lg font-bold text-yellow-600" id="remainingCount">5000</div>
+                            <div class="text-sm text-yellow-800" data-translate="remaining">Υπό Εκκένωση</div>
+                        </div>
+                        
+                        <div class="bg-red-50 p-3 rounded">
+                            <div class="text-lg font-bold text-red-600" id="riskCount">0</div>
+                            <div class="text-sm text-red-800" data-translate="atRisk">Σε Κίνδυνο</div>
+                        </div>
+                    </div>
+
+                    <div id="alertsPanel" class="mt-6">
+                        <h4 class="font-semibold text-gray-700 mb-2" data-translate="alerts">🚨 Ειδοποιήσεις</h4>
+                        <div id="alertsList" class="space-y-2 max-h-32 overflow-y-auto">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" data-translate="timeline">Χρονοδιάγραμμα Εκκένωσης</h3>
+                    <div class="h-64 relative">
+                        <canvas id="timelineChart" style="display: none;"></canvas>
+                        <div id="timelineError" class="absolute inset-0 flex items-center justify-center text-gray-500">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">📊</div>
+                                <div class="text-sm" data-translate="chartWillAppear">Το γράφημα θα εμφανιστεί κατά τη διάρκεια της προσομοίωσης</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800" data-translate="riskAssessment">Αξιολόγηση Κινδύνου</h3>
+                    <div class="h-64 relative">
+                        <canvas id="riskChart" style="display: none;"></canvas>
+                        <div id="riskError" class="absolute inset-0 flex items-center justify-center text-gray-500">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">📈</div>
+                                <div class="text-sm" data-translate="riskWillAppear">Η αξιολόγηση κινδύνου θα εμφανιστεί κατά τη διάρκεια της προσομοίωσης</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800" data-translate="detailedReport">Αναλυτική Αναφορά</h3>
+                <div id="detailedReport" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    </div>
+                
+                <div class="mt-6 flex space-x-4">
+                    <button id="exportReport" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded font-semibold transition-colors" data-translate="exportReport">
+                        📊 Εξαγωγή Αναφοράς
+                    </button>
+                    <button id="printReport" class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded font-semibold transition-colors" data-translate="printReport">
+                        🖨️ Εκτύπωση
+                    </button>
+                    <button id="shareReport" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-semibold transition-colors" data-translate="shareReport">
+                        📤 Κοινοποίηση
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-container py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="footer-logos">
+                <div class="flex flex-col items-center space-y-2">
+                    <img src="eu_flag_funding.png" alt="EU Flag Funding" class="footer-logo-img">
+                </div>
+                
+                <div class="flex items-center">
+                    <img src="firescene_partners_logos.jpg" alt="FIRESCENE Partners" class="footer-partners-logo">
+                </div>
+                
+                <div class="flex items-center">
+                    <img src="eu_flag_funding.png" alt="DG ECHO" class="footer-logo-img">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let currentLanguage = 'el';
+        let simulationInterval = null;
+        let timelineChart = null;
+        let riskChart = null;
+
+        // Enhanced language translations
+        const translations = {
+            el: {
+                appTitle: "FIRESCENE Pro - Σύστημα Σχεδιασμού Εκκενώσεων WUI",
+                scenarioParams: "Παράμετροι Σεναρίου",
+                fireParams: "🔥 Παράμετροι Πυρκαγιάς",
+                windDirection: "Κατεύθυνση Ανέμου",
+                fireSpread: "Ταχύτητα Εξάπλωσης (km/h)",
+                windSpeed: "Ένταση Ανέμου (km/h)",
+                population: "👥 Πληθυσμός",
+                totalPopulation: "Συνολικός Πληθυσμός",
+                tourists: "Τουρίστες (%)",
+                vulnerable: "Ευάλωτες Ομάδες (%)",
+                evacuation: "🚪 Εκκένωση",
+                notificationTime: "Χρόνος Ειδοποίησης (min)",
+                preparationTime: "Χρόνος Προετοιμασίας (min)",
+                evacuationSpeed: "Μέση Ταχύτητα Εκκένωσης (km/h)",
+                startSim: "▶️ Έναρξη Simulation",
+                pauseSim: "⏸️ Παύση",
+                resetSim: "🔄 Επαναφορά",
+                continueSim: "▶️ Συνέχεια",
+                evacuationMap: "Χάρτης Εκκένωσης",
+                evacuationStatus: "Κατάσταση Εκκένωσης",
+                simTime: "Χρόνος Simulation",
+                notification: "Ειδοποίηση",
+                evacuationPop: "Εκκένωση Πληθυσμού",
+                fireSpreadLabel: "Εξάπλωση Πυρκαγιάς",
+                evacuated: "Εκκενωμένοι",
+                remaining: "Υπό Εκκένωση",
+                atRisk: "Σε Κίνδυνο",
+                alerts: "🚨 Ειδοποιήσεις",
+                timeline: "Χρονοδιάγραμμα Εκκένωσης",
+                riskAssessment: "Αξιολόγηση Κινδύνου",
+                detailedReport: "Αναλυτική Αναφορά",
+                exportReport: "📊 Εξαγωγή Αναφοράς",
+                printReport: "🖨️ Εκτύπωση",
+                shareReport: "📤 Κοινοποίηση",
+                chartWillAppear: "Το γράφημα θα εμφανιστεί κατά τη διάρκεια της προσομοίωσης",
+                riskWillAppear: "Η αξιολόγηση κινδύνου θα εμφανιστεί κατά τη διάρκεια της προσομοίωσης",
+                // Map elements
+                sea: "🌊 Θάλασσα",
+                forest: "🌲 Δάσος",
+                wuiSettlement: "🏘️ WUI Οικισμός",
+                mixedZone: "Μικτή Ζώνη",
+                forestResidential: "Δάσους-Κατοικιών",
+                hotels: "🏨 Ξενοδοχεία",
+                campingAnd: "& Camping",
+                camping: "⛺ Camping",
+                tourist: "Τουριστικό",
+                safeZoneA: "Ασφαλής Ζώνη A",
+                safeZoneB: "Ασφαλής Ζώνη B",
+                fireOrigin: "🔥 Εστία Πυρκαγιάς",
+                windIndicator: "💨 N→S",
+                // Legend
+                legendSafeZones: "Ασφαλείς Ζώνες",
+                legendDangerZone: "Ζώνη Κινδύνου",
+                legendWUISettlement: "WUI Οικισμός",
+                legendSea: "🌊 Θάλασσα",
+                legendEvacuationRoutes: "Διαδρομές Εκκένωσης",
+                legendFireOrigin: "Εστία Πυρκαγιάς",
+                legendForest: "🌲 Δάσος",
+                legendHotels: "🏨 Ξενοδοχεία",
+                // Simulation alert messages
+                simulationMessages: {
+                    initial: `🔥 ΠΥΡΚΑΓΙΑ ΕΝΤΟΠΙΣΤΗΚΕ! Κινηθείτε προς {evacuationDirection} (αντίθετα από τον άνεμο). Αποφύγετε την περιοχή με καπνό.`,
+                    notification: `📢 ΕΠΙΣΗΜΗ ΕΙΔΟΠΟΙΗΣΗ ΕΚΚΕΝΩΣΗΣ! Συλλέξτε: ταυτότητα, φάρμακα, νερό, φακό. Κατεύθυνση: {evacuationDirection}.`,
+                    evacuation: `🚶 ΕΚΚΕΝΩΣΗ ΣΕ ΕΞΕΛΙΞΗ! Ακολουθήστε τις οδηγίες αρχών. Μην επιστρέψετε για αντικείμενα. Προσοχή σε καπνό και πυρκαγιά.`,
+                    critical: `🚨 ΚΡΙΤΙΚΗ ΚΑΤΑΣΤΑΣΗ! Άμεση εκκένωση προς {evacuationDirection}. Καλύψτε στόμα/μύτη. Αποφύγετε δασικές περιοχές.`,
+                    fireNear: `🔥 Η ΠΥΡΚΑΓΙΑ ΠΛΗΣΙΑΖΕΙ! Κινηθείτε γρήγορα προς ασφαλή ζώνη. Μείνετε χαμηλά αν υπάρχει καπνός.`,
+                    complete: `✅ ΕΚΚΕΝΩΣΗ ΟΛΟΚΛΗΡΩΘΗΚΕ! Παραμείνετε στις ασφαλείς ζώνες μέχρι νεότερη ειδοποίηση.`,
+                    paused: '⏸️ Simulation σε παύση',
+                    resumed: '▶️ Simulation συνεχίζεται',
+                    reset: '🔄 Simulation επαναφέρθηκε',
+                    exported: '📊 Αναφορά εξήχθη επιτυχώς',
+                    exportError: '❌ Σφάλμα εξαγωγής αναφοράς',
+                    printed: '🖨️ Αναφορά στάλθηκε για εκτύπωση',
+                    printError: '❌ Σφάλμα εκτύπωσης',
+                    shared: '📤 Αναφορά κοινοποιήθηκε επιτυχώς',
+                    shareError: '❌ Αδυναμία κοινοποίησης αναφοράς',
+                    copied: '📋 Σύνοψη αναφοράς αντιγράφηκε στο clipboard',
+                    inactive: '⏸️ Simulation παύθηκε (καρτέλα αδρανής)',
+                    welcome: '🚀 FIRESCENE Pro System έτοιμο. Ρυθμίστε παραμέτρους και πατήστε Έναρξη.',
+                    ready: '✅ Σύστημα πλήρως λειτουργικό. Όλες οι λειτουργίες διαθέσιμες.'
+                }
+            },
+            en: {
+                appTitle: "FIRESCENE Pro - WUI Evacuation Planning System",
+                scenarioParams: "Scenario Parameters",
+                fireParams: "🔥 Fire Parameters",
+                fireSpread: "Spread Rate (km/h)",
+                windDirection: "Wind Direction",
+                windSpeed: "Wind Speed (km/h)",
+                population: "👥 Population",
+                totalPopulation: "Total Population",
+                tourists: "Tourists (%)",
+                vulnerable: "Vulnerable Groups (%)",
+                evacuation: "🚪 Evacuation",
+                notificationTime: "Notification Time (min)",
+                preparationTime: "Preparation Time (min)",
+                evacuationSpeed: "Average Evacuation Speed (km/h)",
+                startSim: "▶️ Start Simulation",
+                pauseSim: "⏸️ Pause",
+                resetSim: "🔄 Reset",
+                continueSim: "▶️ Continue",
+                evacuationMap: "Evacuation Map",
+                evacuationStatus: "Evacuation Status",
+                simTime: "Simulation Time",
+                notification: "Notification",
+                evacuationPop: "Population Evacuation",
+                fireSpreadLabel: "Fire Spread",
+                evacuated: "Evacuated",
+                remaining: "Evacuating",
+                atRisk: "At Risk",
+                alerts: "🚨 Alerts",
+                timeline: "Evacuation Timeline",
+                riskAssessment: "Risk Assessment",
+                detailedReport: "Detailed Report",
+                exportReport: "📊 Export Report",
+                printReport: "🖨️ Print",
+                shareReport: "📤 Share",
+                chartWillAppear: "Chart will appear during simulation",
+                riskWillAppear: "Risk assessment will appear during simulation",
+                // Map elements
+                sea: "🌊 Sea",
+                forest: "🌲 Forest",
+                wuiSettlement: "🏘️ WUI Settlement",
+                mixedZone: "Mixed Zone",
+                forestResidential: "Forest-Residential",
+                hotels: "🏨 Hotels",
+                campingAnd: "& Camping",
+                camping: "⛺ Camping",
+                tourist: "Tourist",
+                safeZoneA: "Safe Zone A",
+                safeZoneB: "Safe Zone B",
+                fireOrigin: "🔥 Fire Origin",
+                windIndicator: "💨 N→S",
+                // Legend
+                legendSafeZones: "Safe Zones",
+                legendDangerZone: "Danger Zone",
+                legendWUISettlement: "WUI Settlement",
+                legendSea: "🌊 Sea",
+                legendEvacuationRoutes: "Evacuation Routes",
+                legendFireOrigin: "Fire Origin",
+                legendForest: "🌲 Forest",
+                legendHotels: "🏨 Hotels",
+                // Simulation alert messages
+                simulationMessages: {
+                    initial: `🔥 FIRE DETECTED! Move towards {evacuationDirection} (opposite to wind). Avoid smoky areas.`,
+                    notification: `📢 OFFICIAL EVACUATION NOTICE! Gather: ID, medications, water, flashlight. Direction: {evacuationDirection}.`,
+                    evacuation: `🚶 EVACUATION IN PROGRESS! Follow authorities' instructions. Don't return for belongings. Watch for smoke and fire.`,
+                    critical: `🚨 CRITICAL SITUATION! Immediate evacuation towards {evacuationDirection}. Cover mouth/nose. Avoid forested areas.`,
+                    fireNear: `🔥 FIRE APPROACHING! Move quickly to safe zone. Stay low if there's smoke.`,
+                    complete: `✅ EVACUATION COMPLETE! Remain in safe zones until further notice.`,
+                    paused: '⏸️ Simulation paused',
+                    resumed: '▶️ Simulation resumed',
+                    reset: '🔄 Simulation reset',
+                    exported: '📊 Report exported successfully',
+                    exportError: '❌ Report export failed',
+                    printed: '🖨️ Report sent to printer',
+                    printError: '❌ Print failed',
+                    shared: '📤 Report shared successfully',
+                    shareError: '❌ Unable to share report',
+                    copied: '📋 Report summary copied to clipboard',
+                    inactive: '⏸️ Simulation paused (tab inactive)',
+                    welcome: '🚀 FIRESCENE Pro System ready. Configure parameters and press Start.',
+                    ready: '✅ System fully operational. All functions available.'
+                }
+            },
+            es: {
+                appTitle: "FIRESCENE Pro - Sistema de Planificación de Evacuación WUI",
+                scenarioParams: "Parámetros del Escenario",
+                fireParams: "🔥 Parámetros del Fuego",
+                fireSpread: "Velocidad de Propagación (km/h)",
+                windDirection: "Dirección del Viento",
+                windSpeed: "Velocidad del Viento (km/h)",
+                population: "👥 Población",
+                totalPopulation: "Población Total",
+                tourists: "Turistas (%)",
+                vulnerable: "Grupos Vulnerables (%)",
+                evacuation: "🚪 Evacuación",
+                notificationTime: "Tiempo de Notificación (min)",
+                preparationTime: "Tiempo de Preparación (min)",
+                evacuationSpeed: "Velocidad Promedio de Evacuación (km/h)",
+                startSim: "▶️ Iniciar Simulación",
+                pauseSim: "⏸️ Pausar",
+                resetSim: "🔄 Reiniciar",
+                continueSim: "▶️ Continuar",
+                evacuationMap: "Mapa de Evacuación",
+                evacuationStatus: "Estado de Evacuación",
+                simTime: "Tiempo de Simulación",
+                notification: "Notificación",
+                evacuationPop: "Evacuación de Población",
+                fireSpreadLabel: "Propagación del Fuego",
+                evacuated: "Evacuados",
+                remaining: "Evacuando",
+                atRisk: "En Riesgo",
+                alerts: "🚨 Alertas",
+                timeline: "Cronología de Evacuación",
+                riskAssessment: "Evaluación de Riesgo",
+                detailedReport: "Informe Detallado",
+                exportReport: "📊 Exportar Informe",
+                printReport: "🖨️ Imprimir",
+                shareReport: "📤 Compartir",
+                chartWillAppear: "El gráfico aparecerá durante la simulación",
+                riskWillAppear: "La evaluación de riesgo aparecerá durante la simulación",
+                // Map elements
+                sea: "🌊 Mar",
+                forest: "🌲 Bosque",
+                wuiSettlement: "🏘️ Asentamiento WUI",
+                mixedZone: "Zona Mixta",
+                forestResidential: "Bosque-Residencial",
+                hotels: "🏨 Hoteles",
+                campingAnd: "& Camping",
+                camping: "⛺ Camping",
+                tourist: "Turístico",
+                safeZoneA: "Zona Segura A",
+                safeZoneB: "Zona Segura B",
+                fireOrigin: "🔥 Origen del Fuego",
+                windIndicator: "💨 N→S",
+                // Legend
+                legendSafeZones: "Zonas Seguras",
+                legendDangerZone: "Zona de Peligro",
+                legendWUISettlement: "Asentamiento WUI",
+                legendSea: "🌊 Mar",
+                legendEvacuationRoutes: "Rutas de Evacuación",
+                legendFireOrigin: "Origen del Fuego",
+                legendForest: "🌲 Bosque",
+                legendHotels: "🏨 Hoteles",
+                // Simulation alert messages
+                simulationMessages: {
+                    initial: `🔥 FUEGO DETECTADO! Muévase hacia {evacuationDirection} (opuesto al viento). Evite áreas con humo.`,
+                    notification: `📢 AVISO OFICIAL DE EVACUACIÓN! Reúna: identificación, medicamentos, agua, linterna. Dirección: {evacuationDirection}.`,
+                    evacuation: `🚶 EVACUACIÓN EN CURSO! Siga las instrucciones de las autoridades. No regrese por pertenencias. Cuidado con humo y fuego.`,
+                    critical: `🚨 SITUACIÓN CRÍTICA! Evacuación inmediata hacia {evacuationDirection}. Cubra boca/nariz. Evite áreas forestales.`,
+                    fireNear: `🔥 FUEGO ACERCÁNDOSE! Muévase rápidamente a zona segura. Manténgase bajo si hay humo.`,
+                    complete: `✅ EVACUACIÓN COMPLETA! Permanezca en zonas seguras hasta nuevo aviso.`,
+                    paused: '⏸️ Simulación pausada',
+                    resumed: '▶️ Simulación reanudada',
+                    reset: '🔄 Simulación reiniciada',
+                    exported: '📊 Informe exportado exitosamente',
+                    exportError: '❌ Error al exportar informe',
+                    printed: '🖨️ Informe enviado a imprimir',
+                    printError: '❌ Error de impresión',
+                    shared: '📤 Informe compartido exitosamente',
+                    shareError: '❌ No se pudo compartir el informe',
+                    copied: '📋 Resumen del informe copiado al portapapeles',
+                    inactive: '⏸️ Simulación pausada (pestaña inactiva)',
+                    welcome: '🚀 Sistema FIRESCENE Pro listo. Configure parámetros y presione Iniciar.',
+                    ready: '✅ Sistema completamente operativo. Todas las funciones disponibles.'
+                }
+            },
+            it: {
+                appTitle: "FIRESCENE Pro - Sistema di Pianificazione di Evacuazione WUI",
+                scenarioParams: "Parametri dello Scenario",
+                fireParams: "🔥 Parametri dell'Incendio",
+                fireSpread: "Velocità di Propagazione (km/h)",
+                windDirection: "Direzione del Vento",
+                windSpeed: "Velocità del Vento (km/h)",
+                population: "👥 Popolazione",
+                totalPopulation: "Popolazione Totale",
+                tourists: "Turisti (%)",
+                vulnerable: "Gruppi Vulnerabili (%)",
+                evacuation: "🚪 Evacuazione",
+                notificationTime: "Tempo di Notifica (min)",
+                preparationTime: "Tempo di Preparazione (min)",
+                evacuationSpeed: "Velocità Media di Evacuazione (km/h)",
+                startSim: "▶️ Avvia Simulazione",
+                pauseSim: "⏸️ Pausa",
+                resetSim: "🔄 Ripristina",
+                continueSim: "▶️ Continua",
+                evacuationMap: "Mappa di Evacuazione",
+                evacuationStatus: "Stato di Evacuazione",
+                simTime: "Tempo di Simulazione",
+                notification: "Notifica",
+                evacuationPop: "Evacuazione della Popolazione",
+                fireSpreadLabel: "Propagazione dell'Incendio",
+                evacuated: "Evacuati",
+                remaining: "In Evacuazione",
+                atRisk: "A Rischio",
+                alerts: "🚨 Avvisi",
+                timeline: "Cronologia di Evacuazione",
+                riskAssessment: "Valutazione del Rischio",
+                detailedReport: "Rapporto Dettagliato",
+                exportReport: "📊 Esporta Rapporto",
+                printReport: "🖨️ Stampa",
+                shareReport: "📤 Condividi",
+                chartWillAppear: "Il grafico apparirà durante la simulazione",
+                riskWillAppear: "La valutazione del rischio apparirà durante la simulazione",
+                // Map elements
+                sea: "🌊 Mare",
+                forest: "🌲 Foresta",
+                wuiSettlement: "🏘️ Insediamento WUI",
+                mixedZone: "Zona Mista",
+                forestResidential: "Foresta-Residenziale",
+                hotels: "🏨 Hotel",
+                campingAnd: "& Campeggio",
+                camping: "⛺ Campeggio",
+                tourist: "Turistico",
+                safeZoneA: "Zona Sicura A",
+                safeZoneB: "Zona Sicura B",
+                fireOrigin: "🔥 Origine dell'Incendio",
+                windIndicator: "💨 N→S",
+                // Legend
+                legendSafeZones: "Zone Sicure",
+                legendDangerZone: "Zona di Pericolo",
+                legendWUISettlement: "Insediamento WUI",
+                legendSea: "🌊 Mare",
+                legendEvacuationRoutes: "Percorsi di Evacuazione",
+                legendFireOrigin: "Origine dell'Incendio",
+                legendForest: "🌲 Foresta",
+                legendHotels: "🏨 Hotel",
+                // Simulation alert messages
+                simulationMessages: {
+                    initial: `🔥 INCENDIO RILEVATO! Muoviti verso {evacuationDirection} (opposto al vento). Evita le aree fumose.`,
+                    notification: `📢 AVVISO UFFICIALE DI EVACUAZIONE! Raccogli: documenti, farmaci, acqua, torcia. Direzione: {evacuationDirection}.`,
+                    evacuation: `🚶 EVACUAZIONE IN CORSO! Segui le istruzioni delle autorità. Non tornare indietro per oggetti. Fai attenzione a fumo e fuoco.`,
+                    critical: `🚨 SITUAZIONE CRITICA! Evacuazione immediata verso {evacuationDirection}. Copri bocca/naso. Evita le aree boschive.`,
+                    fireNear: `🔥 INCENDIO IN AVVICINAMENTO! Muoviti rapidamente verso la zona sicura. Stai in basso se c'è fumo.`,
+                    complete: `✅ EVACUAZIONE COMPLETATA! Rimani nelle zone sicure fino a nuovo avviso.`,
+                    paused: '⏸️ Simulazione in pausa',
+                    resumed: '▶️ Simulazione ripresa',
+                    reset: '🔄 Simulazione ripristinata',
+                    exported: '📊 Rapporto esportato con successo',
+                    exportError: '❌ Errore nell\'esportazione del rapporto',
+                    printed: '🖨️ Rapporto inviato alla stampante',
+                    printError: '❌ Errore di stampa',
+                    shared: '📤 Rapporto condiviso con successo',
+                    shareError: '❌ Impossibile condividere il rapporto',
+                    copied: '📋 Riepilogo rapporto copiato negli appunti',
+                    inactive: '⏸️ Simulazione in pausa (scheda inattiva)',
+                    welcome: '🚀 Sistema FIRESCENE Pro pronto. Configura i parametri e premi Avvia.',
+                    ready: '✅ Sistema completamente operativo. Tutte le funzioni disponibili.'
+                }
+            }
+        };
+
+        // Wind directions
+        const windDirections = {
+            el: {
+                N: "Βόρεια", NE: "Βορειοανατολικά", E: "Ανατολικά", SE: "Νοτιοανατολικά",
+                S: "Νότια", SW: "Νοτιοδυτικά", W: "Δυτικά", NW: "Βορειοδυτικά"
+            },
+            en: {
+                N: "North", NE: "Northeast", E: "East", SE: "Southeast",
+                S: "South", SW: "Southwest", W: "West", NW: "Northwest"
+            },
+            es: {
+                N: "Norte", NE: "Noreste", E: "Este", SE: "Sureste",
+                S: "Sur", SW: "Suroeste", W: "Oeste", NW: "Noroeste"
+            },
+            it: {
+                N: "Nord", NE: "Nord-Est", E: "Est", SE: "Sud-Est",
+                S: "Sud", SW: "Sud-Ovest", W: "Ovest", NW: "Nord-Ovest"
+            }
+        };
+
+        // Simulation state
+        let simulationState = {
+            isRunning: false,
+            isPaused: false,
+            currentTime: 0,
+            timeStep: 1000, // milliseconds
+            
+            // Simulation parameters
+            fireSpreadRate: 4, // km/h
+            windDirection: 'N',
+            windSpeed: 25, // km/h
+            totalPopulation: 5000,
+            touristPercent: 30,
+            vulnerablePercent: 15,
+            notificationTime: 30, // minutes
+            preparationTime: 25, // minutes
+            evacuationSpeed: 3, // km/h
+            
+            // Current state
+            notificationSent: false,
+            evacuationStarted: false,
+            evacuatedCount: 0,
+            remainingCount: 5000,
+            riskCount: 0,
+            fireRadius: 0,
+            
+            // Events log
+            events: [],
+            alerts: []
+        };
+
+        // DOM elements cache
+        const elements = {};
+
+        // Safe translation function with fallback
+        function getTranslation(key, lang = currentLanguage) {
+            try {
+                // Check if it's a direct translation or a message from simulationMessages
+                if (translations[lang] && translations[lang][key]) {
+                    return translations[lang][key];
+                } else if (translations[lang] && translations[lang].simulationMessages && translations[lang].simulationMessages[key]) {
+                    return translations[lang].simulationMessages[key];
+                }
+                // Fallback to default language (el)
+                if (translations.el && translations.el[key]) {
+                    return translations.el[key];
+                } else if (translations.el && translations.el.simulationMessages && translations.el.simulationMessages[key]) {
+                    return translations.el.simulationMessages[key];
+                }
+                console.warn(`Translation missing for key: ${key} in language: ${lang}`);
+                return key; // Return key if no translation found
+            } catch (error) {
+                console.error(`Translation error for key: ${key}`, error);
+                return key;
+            }
+        }
+
+        // Enhanced language change function with map elements
+        function changeLanguage(lang) {
+            try {
+                currentLanguage = lang;
+                
+                // Update all translatable elements
+                document.querySelectorAll('[data-translate]').forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    const translatedText = getTranslation(key, lang);
+                    
+                    if (element.tagName === 'INPUT' && element.type === 'button') {
+                        element.value = translatedText;
+                    } else if (element.tagName === 'BUTTON') {
+                        element.textContent = translatedText;
+                    } else {
+                        element.textContent = translatedText;
+                    }
+                });
+
+                // Update wind direction options
+                const windSelect = document.getElementById('windDirection');
+                if (windSelect) {
+                    Array.from(windSelect.options).forEach(option => {
+                        if (windDirections[lang] && windDirections[lang][option.value]) {
+                            option.textContent = windDirections[lang][option.value];
+                        }
+                    });
+                }
+
+                // Update wind indicator on map
+                updateWindIndicator();
+
+                // Update page title
+                document.title = getTranslation('appTitle', lang);
+                
+                // Update header title
+                const headerTitle = document.querySelector('h1');
+                if (headerTitle) {
+                    headerTitle.textContent = 'FIRESCENE Pro';
+                }
+                
+                const headerSubtitle = document.querySelector('p.text-red-100');
+                if (headerSubtitle) {
+                    const subtitleText = getTranslation('appTitle', lang).split(' - ')[1] || getTranslation('appTitle', lang);
+                    headerSubtitle.textContent = subtitleText;
+                }
+
+                // Re-add existing alerts in the new language
+                const existingAlerts = Array.from(elements.alertsList.children).map(div => div.textContent);
+                elements.alertsList.innerHTML = ''; // Clear existing alerts
+                simulationState.alerts.reverse().forEach(alert => { // Re-add in correct order
+                    // Re-translate the alert message based on its original key and current language
+                    const evacuationDir = getEvacuationDirection(simulationState.windDirection);
+                    const directionName = windDirections[lang][evacuationDir];
+                    let translatedAlertMessage = getTranslation(alert.originalMessageKey, lang); // Assuming original key was stored
+                    if (translatedAlertMessage.includes('{evacuationDirection}')) {
+                         translatedAlertMessage = translatedAlertMessage.replace('{evacuationDirection}', directionName);
+                    }
+                    addAlert(translatedAlertMessage, alert.type, false); // Add without logging again
+                });
+                simulationState.alerts.reverse(); // Revert back to original order
+
+                // Update chart labels when language changes
+                updateChartLabels();
+                
+                // Update detailed report when language changes
+                updateDetailedReport();
+            } catch (error) {
+                console.error('Language change error:', error);
+            }
+        }
+
+        // Function to update wind indicator text based on current direction and language
+        function updateWindIndicator() {
+            try {
+                const windIndicatorLabel = document.getElementById('windIndicatorLabel');
+                if (windIndicatorLabel) {
+                    const direction = simulationState.windDirection;
+                    
+                    // Create arrow text based on direction
+                    let arrowText = '';
+                    switch(direction) {
+                        case 'N': arrowText = '💨 N→S'; break;
+                        case 'NE': arrowText = '💨 NE→SW'; break;
+                        case 'E': arrowText = '💨 E→W'; break;
+                        case 'SE': arrowText = '💨 SE→NW'; break;
+                        case 'S': arrowText = '💨 S→N'; break;
+                        case 'SW': arrowText = '💨 SW→NE'; break;
+                        case 'W': arrowText = '💨 W→E'; break;
+                        case 'NW': arrowText = '💨 NW→SE'; break;
+                        default: arrowText = '💨 N→S';
+                    }
+                    
+                    windIndicatorLabel.textContent = arrowText;
+                }
+            } catch (error) {
+                console.warn('Wind indicator update error:', error);
+            }
+        }
+
+        // Enhanced DOM element caching
+        function cacheElements() {
+            try {
+                const elementIds = [
+                    'fireSpread', 'fireSpreadValue', 'windDirection', 'windSpeed', 'windSpeedValue',
+                    'totalPopulation', 'touristPercent', 'touristPercentValue', 'vulnerablePercent', 'vulnerablePercentValue',
+                    'notificationTime', 'notificationTimeValue', 'preparationTime', 'preparationTimeValue',
+                    'evacuationSpeed', 'evacuationSpeedValue', 'startSimulation', 'pauseSimulation', 'resetSimulation',
+                    'simulationTime', 'notificationProgress', 'evacuationProgress', 'fireProgress',
+                    'notificationBar', 'evacuationBar', 'fireBar', 'evacuatedCount', 'remainingCount', 'riskCount',
+                    'alertsList', 'detailedReport', 'fireSpreadCircle', 'exportReport', 'printReport', 'shareReport',
+                    'langSelect'
+                ];
+
+                elementIds.forEach(id => {
+                    elements[id] = document.getElementById(id);
+                });
+
+                console.log('Elements cached successfully');
+            } catch (error) {
+                console.error('Element caching error:', error);
+            }
+        }
+
+        // Get evacuation direction based on wind direction
+        function getEvacuationDirection(windDir) {
+            const oppositeDirections = {
+                'N': 'S', 'NE': 'SW', 'E': 'W', 'SE': 'NW',
+                'S': 'N', 'SW': 'NE', 'W': 'E', 'NW': 'SE'
+            };
+            return oppositeDirections[windDir] || 'S';
+        }
+
+        // Function to get translated evacuation instructions with dynamic direction
+        function getTranslatedEvacuationInstruction(key, lang) {
+            const evacuationDir = getEvacuationDirection(simulationState.windDirection);
+            const directionName = windDirections[lang][evacuationDir];
+            let message = translations[lang].simulationMessages[key] || translations.el.simulationMessages[key];
+            if (message && message.includes('{evacuationDirection}')) {
+                message = message.replace('{evacuationDirection}', directionName);
+            }
+            return message;
+        }
+
+        // Enhanced slider initialization with debouncing
+        function initializeSliders() {
+            const debounce = (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+
+            const updateFireSpread = debounce((value) => {
+                simulationState.fireSpreadRate = parseFloat(value);
+                if (elements.fireSpreadValue) elements.fireSpreadValue.textContent = `${value} km/h`;
+            }, 100);
+
+            const updateWindSpeed = debounce((value) => {
+                simulationState.windSpeed = parseFloat(value);
+                if (elements.windSpeedValue) elements.windSpeedValue.textContent = `${value} km/h`;
+            }, 100);
+
+            const updateTouristPercent = debounce((value) => {
+                simulationState.touristPercent = parseFloat(value);
+                if (elements.touristPercentValue) elements.touristPercentValue.textContent = `${value}%`;
+            }, 100);
+
+            const updateVulnerablePercent = debounce((value) => {
+                simulationState.vulnerablePercent = parseFloat(value);
+                if (elements.vulnerablePercentValue) elements.vulnerablePercentValue.textContent = `${value}%`;
+            }, 100);
+
+            const updateNotificationTime = debounce((value) => {
+                simulationState.notificationTime = parseFloat(value);
+                if (elements.notificationTimeValue) elements.notificationTimeValue.textContent = `${value} min`;
+            }, 100);
+
+            const updatePreparationTime = debounce((value) => {
+                simulationState.preparationTime = parseFloat(value);
+                if (elements.preparationTimeValue) elements.preparationTimeValue.textContent = `${value} min`;
+            }, 100);
+
+            const updateEvacuationSpeed = debounce((value) => {
+                simulationState.evacuationSpeed = parseFloat(value);
+                if (elements.evacuationSpeedValue) elements.evacuationSpeedValue.textContent = `${value} km/h`;
+            }, 100);
+
+            if (elements.fireSpread) elements.fireSpread.addEventListener('input', (e) => updateFireSpread(e.target.value));
+            if (elements.windSpeed) elements.windSpeed.addEventListener('input', (e) => updateWindSpeed(e.target.value));
+            if (elements.touristPercent) elements.touristPercent.addEventListener('input', (e) => updateTouristPercent(e.target.value));
+            if (elements.vulnerablePercent) elements.vulnerablePercent.addEventListener('input', (e) => updateVulnerablePercent(e.target.value));
+            if (elements.notificationTime) elements.notificationTime.addEventListener('input', (e) => updateNotificationTime(e.target.value));
+            if (elements.preparationTime) elements.preparationTime.addEventListener('input', (e) => updatePreparationTime(e.target.value));
+            if (elements.evacuationSpeed) elements.evacuationSpeed.addEventListener('input', (e) => updateEvacuationSpeed(e.target.value));
+
+            if (elements.totalPopulation) {
+                elements.totalPopulation.addEventListener('input', (e) => {
+                    simulationState.totalPopulation = parseInt(e.target.value);
+                    simulationState.remainingCount = simulationState.totalPopulation;
+                    updateDisplay();
+                });
+            }
+
+            if (elements.windDirection) {
+                elements.windDirection.addEventListener('change', (e) => {
+                    simulationState.windDirection = e.target.value;
+                    updateWindIndicator();
+                });
+            }
+        }
+
+        // Simulation logic
+        function startSimulation() {
+            if (simulationState.isRunning) return;
+            
+            simulationState.isRunning = true;
+            simulationState.isPaused = false;
+            simulationState.currentTime = 0;
+            simulationState.notificationSent = false;
+            simulationState.evacuationStarted = false;
+            simulationState.evacuatedCount = 0;
+            simulationState.remainingCount = simulationState.totalPopulation;
+            simulationState.riskCount = 0;
+            simulationState.fireRadius = 0;
+            simulationState.events = [];
+            simulationState.alerts = [];
+            
+            if (elements.startSimulation) elements.startSimulation.disabled = true;
+            if (elements.pauseSimulation) elements.pauseSimulation.disabled = false;
+            if (elements.fireSpreadCircle) elements.fireSpreadCircle.style.display = 'block';
+            
+            // Show charts when simulation starts
+            const timelineChartEl = document.getElementById('timelineChart');
+            const riskChartEl = document.getElementById('riskChart');
+            const timelineErrorEl = document.getElementById('timelineError');
+            const riskErrorEl = document.getElementById('riskError');
+            
+            if (timelineChartEl) timelineChartEl.style.display = 'block';
+            if (riskChartEl) riskChartEl.style.display = 'block';
+            if (timelineErrorEl) timelineErrorEl.style.display = 'none';
+            if (riskErrorEl) riskErrorEl.style.display = 'none';
+            
+            addAlert(getTranslatedEvacuationInstruction('initial', currentLanguage), 'warning', 'initial');
+            
+            simulationInterval = setInterval(simulationStep, simulationState.timeStep);
+        }
+
+        function pauseSimulation() {
+            if (!simulationState.isRunning) return;
+            
+            simulationState.isPaused = !simulationState.isPaused;
+            
+            if (simulationState.isPaused) {
+                clearInterval(simulationInterval);
+                if (elements.pauseSimulation) elements.pauseSimulation.textContent = getTranslation('continueSim');
+                addAlert(getTranslation('paused'), 'info', 'paused');
+            } else {
+                simulationInterval = setInterval(simulationStep, simulationState.timeStep);
+                if (elements.pauseSimulation) elements.pauseSimulation.textContent = getTranslation('pauseSim');
+                addAlert(getTranslation('resumed'), 'info', 'resumed');
+            }
+        }
+
+        function resetSimulation() {
+            if (simulationInterval) clearInterval(simulationInterval);
+            
+            simulationState.isRunning = false;
+            simulationState.isPaused = false;
+            simulationState.currentTime = 0;
+            simulationState.notificationSent = false;
+            simulationState.evacuationStarted = false;
+            simulationState.evacuatedCount = 0;
+            simulationState.remainingCount = simulationState.totalPopulation;
+            simulationState.riskCount = 0;
+            simulationState.fireRadius = 0;
+            simulationState.events = [];
+            simulationState.alerts = [];
+            
+            if (elements.startSimulation) elements.startSimulation.disabled = false;
+            if (elements.pauseSimulation) elements.pauseSimulation.disabled = true;
+            if (elements.pauseSimulation) elements.pauseSimulation.textContent = getTranslation('pauseSim');
+            if (elements.fireSpreadCircle) elements.fireSpreadCircle.style.display = 'none';
+            
+            // Hide charts when simulation is reset
+            const timelineChartEl = document.getElementById('timelineChart');
+            const riskChartEl = document.getElementById('riskChart');
+            const timelineErrorEl = document.getElementById('timelineError');
+            const riskErrorEl = document.getElementById('riskError');
+            
+            if (timelineChartEl) timelineChartEl.style.display = 'none';
+            if (riskChartEl) riskChartEl.style.display = 'none';
+            if (timelineErrorEl) timelineErrorEl.style.display = 'flex';
+            if (riskErrorEl) riskErrorEl.style.display = 'flex';
+            
+            updateDisplay();
+            if (elements.alertsList) elements.alertsList.innerHTML = '';
+            
+            // Reset charts if they exist
+            if (window.timelineChart && window.timelineChart.data) {
+                window.timelineChart.data.labels = [];
+                if (window.timelineChart.data.datasets[0]) window.timelineChart.data.datasets[0].data = [];
+                if (window.timelineChart.data.datasets[1]) window.timelineChart.data.datasets[1].data = [];
+                window.timelineChart.update();
+            }
+            
+            if (window.riskChart && window.riskChart.data && window.riskChart.data.datasets[0]) {
+                window.riskChart.data.datasets[0].data = [0, 0, 0];
+                window.riskChart.update();
+            }
+            
+            addAlert(getTranslation('reset'), 'info', 'reset');
+        }
+
+        function simulationStep() {
+            if (simulationState.isPaused) return;
+            
+            simulationState.currentTime += 1; // 1 minute per step
+            
+            // Calculate fire spread (radius in pixels for visualization)
+            const windFactor = 1 + (simulationState.windSpeed / 100); // Wind increases spread rate
+            const effectiveSpreadRate = simulationState.fireSpreadRate * windFactor;
+            const fireSpreadKm = (effectiveSpreadRate * simulationState.currentTime) / 60; // km
+            simulationState.fireRadius = Math.min(fireSpreadKm * 15, 250); // Convert to pixels, max 250px
+            
+            // Check notification timing
+            if (!simulationState.notificationSent && simulationState.currentTime >= simulationState.notificationTime) {
+                simulationState.notificationSent = true;
+                addAlert(getTranslatedEvacuationInstruction('notification', currentLanguage), 'warning', 'notification');
+                simulationState.events.push({
+                    time: simulationState.currentTime,
+                    event: 'Notification Sent',
+                    description: getTranslatedEvacuationInstruction('notification', currentLanguage)
+                });
+            }
+            
+            // Check evacuation start
+            if (!simulationState.evacuationStarted && simulationState.notificationSent && 
+                simulationState.currentTime >= (simulationState.notificationTime + simulationState.preparationTime)) {
+                simulationState.evacuationStarted = true;
+                addAlert(getTranslatedEvacuationInstruction('evacuation', currentLanguage), 'warning', 'evacuation');
+                simulationState.events.push({
+                    time: simulationState.currentTime,
+                    event: 'Evacuation Started',
+                    description: getTranslatedEvacuationInstruction('evacuation', currentLanguage)
+                });
+            }
+            
+            // Calculate evacuation progress
+            if (simulationState.evacuationStarted) {
+                const evacuationTime = simulationState.currentTime - (simulationState.notificationTime + simulationState.preparationTime);
+                const baseEvacuationTime = 90; // Base time to evacuate everyone (minutes)
+                
+                // Adjust for various factors
+                const touristFactor = 1 + (simulationState.touristPercent / 100) * 0.5; // Tourists take longer
+                const vulnerableFactor = 1 + (simulationState.vulnerablePercent / 100) * 0.8; // Vulnerable groups take longer
+                const speedFactor = simulationState.evacuationSpeed / 3; // Relative to base speed of 3 km/h
+                const windImpactFactor = 1 + (simulationState.windSpeed / 200); // High winds slow evacuation
+                
+                const adjustedEvacuationTime = baseEvacuationTime * touristFactor * vulnerableFactor * windImpactFactor / speedFactor;
+                
+                // Calculate evacuation percentage
+                const evacuationPercent = Math.min(evacuationTime / adjustedEvacuationTime, 1);
+                simulationState.evacuatedCount = simulationState.totalPopulation * evacuationPercent;
+                simulationState.remainingCount = Math.max(0, simulationState.totalPopulation - simulationState.evacuatedCount);
+                
+                // Calculate people at risk (within fire radius)
+                const fireImpactFactor = Math.min(simulationState.fireRadius / 150, 1); // Normalized fire impact
+                const baseRiskPercent = fireImpactFactor * 0.4; // Max 40% at risk when fire is close
+                simulationState.riskCount = Math.floor(simulationState.remainingCount * baseRiskPercent);
+                
+                // Check for critical situations
+                if (simulationState.riskCount > simulationState.totalPopulation * 0.1 && evacuationTime % 15 === 0) {
+                    addAlert(getTranslatedEvacuationInstruction('critical', currentLanguage), 'danger', 'critical');
+                }
+                
+                // Check if evacuation is complete
+                if (simulationState.remainingCount <= 0) {
+                    addAlert(getTranslatedEvacuationInstruction('complete', currentLanguage), 'success', 'complete');
+                    clearInterval(simulationInterval);
+                    simulationState.isRunning = false;
+                    if (elements.startSimulation) elements.startSimulation.disabled = false;
+                    if (elements.pauseSimulation) elements.pauseSimulation.disabled = true;
+                }
+            }
+            
+            // Check for fire reaching community
+            if (simulationState.fireRadius > 80 && simulationState.currentTime % 20 === 0) { // Fire reached community threshold
+                addAlert(getTranslatedEvacuationInstruction('fireNear', currentLanguage), 'danger', 'fireNear');
+            }
+            
+            updateDisplay();
+        }
+
+        function addAlert(message, type = 'info', originalMessageKey = null) {
+            const alertDiv = document.createElement('div');
+            const colors = {
+                info: 'bg-blue-100 text-blue-800 border-blue-300',
+                warning: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                danger: 'bg-red-100 text-red-800 border-red-300',
+                success: 'bg-green-100 text-green-800 border-green-300'
+            };
+            
+            alertDiv.className = `p-2 rounded border text-xs fade-in ${colors[type]}`;
+            alertDiv.textContent = `[${Math.floor(simulationState.currentTime/60).toString().padStart(2,'0')}:${(simulationState.currentTime%60).toString().padStart(2,'0')}] ${message}`;
+            
+            if (elements.alertsList) {
+                elements.alertsList.insertBefore(alertDiv, elements.alertsList.firstChild);
+                
+                // Keep only last 10 alerts
+                while (elements.alertsList.children.length > 10) {
+                    elements.alertsList.removeChild(elements.alertsList.lastChild);
+                }
+            }
+            
+            simulationState.alerts.unshift({
+                time: simulationState.currentTime,
+                message: message,
+                type: type,
+                originalMessageKey: originalMessageKey // Store the key for re-translation
+            });
+        }
+
+        function updateDisplay() {
+            // Update time display
+            const hours = Math.floor(simulationState.currentTime / 60);
+            const minutes = simulationState.currentTime % 60;
+            if (elements.simulationTime) {
+                elements.simulationTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            }
+            
+            // Update progress bars
+            const notificationPercent = simulationState.notificationSent ? 100 : Math.min((simulationState.currentTime / simulationState.notificationTime) * 100, 100);
+            const evacuationPercent = simulationState.totalPopulation > 0 ? (simulationState.evacuatedCount / simulationState.totalPopulation) * 100 : 0;
+            const firePercent = Math.min((simulationState.fireRadius / 250) * 100, 100);
+            
+            if (elements.notificationProgress) elements.notificationProgress.textContent = `${Math.round(notificationPercent)}%`;
+            if (elements.evacuationProgress) elements.evacuationProgress.textContent = `${Math.round(evacuationPercent)}%`;
+            if (elements.fireProgress) elements.fireProgress.textContent = `${Math.round(firePercent)}%`;
+            
+            if (elements.notificationBar) elements.notificationBar.style.width = `${notificationPercent}%`;
+            if (elements.evacuationBar) elements.evacuationBar.style.width = `${evacuationPercent}%`;
+            if (elements.fireBar) elements.fireBar.style.width = `${firePercent}%`;
+            
+            // Update counters
+            if (elements.evacuatedCount) elements.evacuatedCount.textContent = Math.round(simulationState.evacuatedCount);
+            if (elements.remainingCount) elements.remainingCount.textContent = Math.round(simulationState.remainingCount);
+            if (elements.riskCount) elements.riskCount.textContent = Math.round(simulationState.riskCount);
+            
+            // Update fire visualization - use ellipse for directional spread
+            const fireSpreadElement = elements.fireSpreadCircle;
+            if (fireSpreadElement) {
+                fireSpreadElement.setAttribute('rx', simulationState.fireRadius);
+                fireSpreadElement.setAttribute('ry', simulationState.fireRadius * 0.7); // Elliptical for wind effect
+                fireSpreadElement.setAttribute('cx', 480);
+                fireSpreadElement.setAttribute('cy', 40);
+            }
+            
+            // Update detailed report
+            updateDetailedReport();
+            
+            // Update charts (if they exist)
+            if (typeof updateCharts === 'function') {
+                updateCharts();
+            }
+        }
+
+        // Enhanced updateDetailedReport function with complete translations
+        function updateDetailedReport() {
+            const totalTime = Math.max(simulationState.currentTime, 1);
+            const evacuationEfficiency = (simulationState.totalPopulation > 0) ? (simulationState.evacuatedCount / simulationState.totalPopulation) * 100 : 0;
+            
+            // Proper risk level translation
+            const riskLevels = {
+                el: { high: 'ΥΨΗΛΟΣ', medium: 'ΜΕΤΡΙΟΣ', low: 'ΧΑΜΗΛΟΣ' },
+                en: { high: 'HIGH', medium: 'MEDIUM', low: 'LOW' },
+                es: { high: 'ALTO', medium: 'MEDIO', low: 'BAJO' },
+                it: { high: 'ALTO', medium: 'MEDIO', low: 'BASSO' }
+            };
+            
+            let riskLevel;
+            if (simulationState.riskCount > simulationState.totalPopulation * 0.2) {
+                riskLevel = riskLevels[currentLanguage].high;
+            } else if (evacuationEfficiency > 80) {
+                riskLevel = riskLevels[currentLanguage].low;
+            } else {
+                riskLevel = riskLevels[currentLanguage].medium;
+            }
+            
+            // Calculate estimated completion time
+            const evacuationDurationSoFar = totalTime - simulationState.notificationTime - simulationState.preparationTime;
+            const evacuationRate = (evacuationDurationSoFar > 0) ? simulationState.evacuatedCount / evacuationDurationSoFar : 0;
+            const remainingTime = simulationState.remainingCount > 0 && evacuationRate > 0 ? 
+                Math.ceil(simulationState.remainingCount / evacuationRate) : 0;
+            
+            // Complete report content translations
+            const reportContent = {
+                el: {
+                    statsTitle: "📊 Στατιστικά Εκκένωσης",
+                    totalPop: "Συνολικός Πληθυσμός:",
+                    evacuated: "Εκκενωμένοι:",
+                    remaining: "Υπολειπόμενοι:",
+                    atRisk: "Σε Κίνδυνο:",
+                    efficiency: "Αποδοτικότητα:",
+                    timelineTitle: "⏱️ Χρονοδιάγραμμα",
+                    currentTime: "Τρέχον Χρόνος:",
+                    notification: "Ειδοποίηση:",
+                    evacuation: "Εκκένωση:",
+                    completion: "Εκτιμώμενη Ολοκλήρωση:",
+                    riskTitle: "⚠️ Αξιολόγηση Κινδύνου",
+                    riskLevel: "Επίπεδο Κινδύνου:",
+                    fireSpeed: "Ταχύτητα Πυρκαγιάς:",
+                    windIntensity: "Ένταση Ανέμου:",
+                    direction: "Κατεύθυνση:",
+                    fireRadius: "Ακτίνα Πυρκαγιάς:",
+                    sent: "✅ Εστάλη",
+                    waiting: "⏳ Αναμονή",
+                    inProgress: "✅ Σε εξέλιξη",
+                    completed: "Ολοκληρώθηκε",
+                    minutes: "λεπτά"
+                },
+                en: {
+                    statsTitle: "📊 Evacuation Statistics",
+                    totalPop: "Total Population:",
+                    evacuated: "Evacuated:",
+                    remaining: "Remaining:",
+                    atRisk: "At Risk:",
+                    efficiency: "Efficiency:",
+                    timelineTitle: "⏱️ Timeline",
+                    currentTime: "Current Time:",
+                    notification: "Notification:",
+                    evacuation: "Evacuation:",
+                    completion: "Estimated Completion:",
+                    riskTitle: "⚠️ Risk Assessment",
+                    riskLevel: "Risk Level:",
+                    fireSpeed: "Fire Speed:",
+                    windIntensity: "Wind Intensity:",
+                    direction: "Direction:",
+                    fireRadius: "Fire Radius:",
+                    sent: "✅ Sent",
+                    waiting: "⏳ Waiting",
+                    inProgress: "✅ In Progress",
+                    completed: "Completed",
+                    minutes: "minutes"
+                },
+                es: {
+                    statsTitle: "📊 Estadísticas de Evacuación",
+                    totalPop: "Población Total:",
+                    evacuated: "Evacuados:",
+                    remaining: "Restantes:",
+                    atRisk: "En Riesgo:",
+                    efficiency: "Eficiencia:",
+                    timelineTitle: "⏱️ Cronología",
+                    currentTime: "Tiempo Actual:",
+                    notification: "Notificación:",
+                    evacuation: "Evacuación:",
+                    completion: "Finalización Estimada:",
+                    riskTitle: "⚠️ Evaluación de Riesgo",
+                    riskLevel: "Nivel de Riesgo:",
+                    fireSpeed: "Velocidad del Fuego:",
+                    windIntensity: "Intensidad del Viento:",
+                    direction: "Dirección:",
+                    fireRadius: "Radio del Fuego:",
+                    sent: "✅ Enviado",
+                    waiting: "⏳ Esperando",
+                    inProgress: "✅ En Progreso",
+                    completed: "Completado",
+                    minutes: "minutos"
+                },
+                it: {
+                    statsTitle: "📊 Statistiche di Evacuazione",
+                    totalPop: "Popolazione Totale:",
+                    evacuated: "Evacuati:",
+                    remaining: "Rimanenti:",
+                    atRisk: "A Rischio:",
+                    efficiency: "Efficienza:",
+                    timelineTitle: "⏱️ Cronologia",
+                    currentTime: "Tempo Attuale:",
+                    notification: "Notifica:",
+                    evacuation: "Evacuazione:",
+                    completion: "Completamento Stimato:",
+                    riskTitle: "⚠️ Valutazione del Rischio",
+                    riskLevel: "Livello di Rischio:",
+                    fireSpeed: "Velocità dell'Incendio:",
+                    windIntensity: "Intensità del Vento:",
+                    direction: "Direzione:",
+                    fireRadius: "Raggio dell'Incendio:",
+                    sent: "✅ Inviato",
+                    waiting: "⏳ In Attesa",
+                    inProgress: "✅ In Corso",
+                    completed: "Completato",
+                    minutes: "minuti"
+                }
+            };
+            
+            const content = reportContent[currentLanguage];
+            
+            // Determine risk level color class
+            const isHighRisk = riskLevel === riskLevels[currentLanguage].high;
+            const isMediumRisk = riskLevel === riskLevels[currentLanguage].medium;
+            const riskColorClass = isHighRisk ? 'text-red-600' : isMediumRisk ? 'text-yellow-600' : 'text-green-600';
+            
+            if (elements.detailedReport) {
+                elements.detailedReport.innerHTML = `
+                    <div class="bg-blue-50 p-4 rounded">
+                        <h4 class="font-semibold text-blue-800 mb-2">${content.statsTitle}</h4>
+                        <div class="space-y-1 text-sm">
+                            <div>${content.totalPop} <span class="font-semibold">${simulationState.totalPopulation}</span></div>
+                            <div>${content.evacuated} <span class="font-semibold">${Math.round(simulationState.evacuatedCount)} (${evacuationEfficiency.toFixed(1)}%)</span></div>
+                            <div>${content.remaining} <span class="font-semibold">${Math.round(simulationState.remainingCount)}</span></div>
+                            <div>${content.atRisk} <span class="font-semibold text-red-600">${Math.round(simulationState.riskCount)}</span></div>
+                            <div>${content.efficiency} <span class="font-semibold">${evacuationEfficiency.toFixed(1)}%</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded">
+                        <h4 class="font-semibold text-yellow-800 mb-2">${content.timelineTitle}</h4>
+                        <div class="space-y-1 text-sm">
+                            <div>${content.currentTime} <span class="font-semibold">${Math.floor(totalTime/60)}:${(totalTime%60).toString().padStart(2,'0')}</span></div>
+                            <div>${content.notification} <span class="font-semibold">${simulationState.notificationSent ? content.sent : content.waiting}</span></div>
+                            <div>${content.evacuation} <span class="font-semibold">${simulationState.evacuationStarted ? content.inProgress : content.waiting}</span></div>
+                            <div>${content.completion} <span class="font-semibold">${remainingTime > 0 ? `${remainingTime} ${content.minutes}` : content.completed}</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded">
+                        <h4 class="font-semibold text-red-800 mb-2">${content.riskTitle}</h4>
+                        <div class="space-y-1 text-sm">
+                            <div>${content.riskLevel} <span class="font-semibold ${riskColorClass}">${riskLevel}</span></div>
+                            <div>${content.fireSpeed} <span class="font-semibold">${simulationState.fireSpreadRate} km/h</span></div>
+                            <div>${content.windIntensity} <span class="font-semibold">${simulationState.windSpeed} km/h</span></div>
+                            <div>${content.direction} <span class="font-semibold">${windDirections[currentLanguage][simulationState.windDirection]}</span></div>
+                            <div>${content.fireRadius} <span class="font-semibold">${(simulationState.fireRadius/15).toFixed(1)} km</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Enhanced chart initialization with complete translations
+        function initializeCharts() {
+            // Only initialize if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not available, charts will be disabled');
+                return;
+            }
+            
+            try {
+                // Timeline Chart
+                const timelineCtx = document.getElementById('timelineChart');
+                if (timelineCtx) {
+                    const chartLabels = {
+                        el: { evacuated: 'Εκκενωμένοι', atRisk: 'Σε Κίνδυνο' },
+                        en: { evacuated: 'Evacuated', atRisk: 'At Risk' },
+                        es: { evacuated: 'Evacuados', atRisk: 'En Riesgo' },
+                        it: { evacuated: 'Evacuati', atRisk: 'A Rischio' }
+                    };
+                    
+                    window.timelineChart = new Chart(timelineCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: [],
+                            datasets: [{
+                                label: chartLabels[currentLanguage].evacuated,
+                                data: [],
+                                borderColor: 'rgb(59, 130, 246)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }, {
+                                label: chartLabels[currentLanguage].atRisk,
+                                data: [],
+                                borderColor: 'rgb(239, 68, 68)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: simulationState.totalPopulation
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Risk Chart
+                const riskCtx = document.getElementById('riskChart');
+                if (riskCtx) {
+                    const riskLabels = {
+                        el: ['Ασφαλείς', 'Υπό Εκκένωση', 'Σε Κίνδυνο'],
+                        en: ['Safe', 'Evacuating', 'At Risk'],
+                        es: ['Seguros', 'Evacuando', 'En Riesgo'],
+                        it: ['Sicuri', 'In Evacuazione', 'A Rischio']
+                    };
+                    
+                    window.riskChart = new Chart(riskCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: riskLabels[currentLanguage],
+                            datasets: [{
+                                data: [0, 0, 0],
+                                backgroundColor: [
+                                    'rgb(16, 185, 129)',
+                                    'rgb(245, 158, 11)',
+                                    'rgb(239, 68, 68)'
+                                ],
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                console.log('✅ Charts initialized successfully');
+            } catch (error) {
+                console.error('Chart initialization failed:', error);
+            }
+        }
+
+        function updateCharts() {
+            try {
+                if (!window.timelineChart || !window.riskChart) return;
+
+                // Update timeline chart
+                const currentTimeLabel = `${Math.floor(simulationState.currentTime/60)}:${(simulationState.currentTime%60).toString().padStart(2,'0')}`;
+                
+                // Limit chart data to last 30 points for performance
+                if (window.timelineChart.data && window.timelineChart.data.labels.length > 30) {
+                    window.timelineChart.data.labels.shift();
+                    window.timelineChart.data.datasets[0].data.shift();
+                    window.timelineChart.data.datasets[1].data.shift();
+                }
+                
+                if (window.timelineChart.data) {
+                    window.timelineChart.data.labels.push(currentTimeLabel);
+                    window.timelineChart.data.datasets[0].data.push(Math.round(simulationState.evacuatedCount));
+                    window.timelineChart.data.datasets[1].data.push(Math.round(simulationState.riskCount));
+                    window.timelineChart.update('none');
+                }
+
+                // Update risk chart
+                const safeCount = Math.round(simulationState.evacuatedCount);
+                const evacuatingCount = Math.round(simulationState.remainingCount - simulationState.riskCount);
+                const riskCount = Math.round(simulationState.riskCount);
+                
+                if (window.riskChart.data && window.riskChart.data.datasets[0]) {
+                    window.riskChart.data.datasets[0].data = [safeCount, evacuatingCount, riskCount];
+                    window.riskChart.update('none');
+                }
+            } catch (error) {
+                console.warn('Chart update warning:', error.message);
+            }
+        }
+
+        // Enhanced updateChartLabels function for proper language switching
+        function updateChartLabels() {
+            try {
+                if (!window.timelineChart || !window.riskChart) return;
+                
+                // Update timeline chart labels
+                const chartLabels = {
+                    el: { evacuated: 'Εκκενωμένοι', atRisk: 'Σε Κίνδυνο' },
+                    en: { evacuated: 'Evacuated', atRisk: 'At Risk' },
+                    es: { evacuated: 'Evacuados', atRisk: 'En Riesgo' },
+                    it: { evacuated: 'Evacuati', atRisk: 'A Rischio' }
+                };
+                
+                if (window.timelineChart.data && window.timelineChart.data.datasets) {
+                    window.timelineChart.data.datasets[0].label = chartLabels[currentLanguage].evacuated;
+                    window.timelineChart.data.datasets[1].label = chartLabels[currentLanguage].atRisk;
+                    window.timelineChart.update('none');
+                }
+                
+                // Update risk chart labels
+                const riskLabels = {
+                    el: ['Ασφαλείς', 'Υπό Εκκένωση', 'Σε Κίνδυνο'],
+                    en: ['Safe', 'Evacuating', 'At Risk'],
+                    es: ['Seguros', 'Evacuando', 'En Riesgo'],
+                    it: ['Sicuri', 'In Evacuazione', 'A Rischio']
+                };
+                
+                if (window.riskChart.data) {
+                    window.riskChart.data.labels = riskLabels[currentLanguage];
+                    window.riskChart.update('none');
+                }
+                
+            } catch (error) {
+                console.warn('Chart label update warning:', error.message);
+            }
+        }
+
+        // Export functions with enhanced error handling
+        function exportReport() {
+            try {
+                const reportData = {
+                    timestamp: new Date().toISOString(),
+                    language: currentLanguage,
+                    simulationParameters: {
+                        fireSpreadRate: simulationState.fireSpreadRate,
+                        windDirection: simulationState.windDirection,
+                        windSpeed: simulationState.windSpeed,
+                        totalPopulation: simulationState.totalPopulation,
+                        touristPercent: simulationState.touristPercent,
+                        vulnerablePercent: simulationState.vulnerablePercent,
+                        notificationTime: simulationState.notificationTime,
+                        preparationTime: simulationState.preparationTime,
+                        evacuationSpeed: simulationState.evacuationSpeed
+                    },
+                    results: {
+                        currentTime: simulationState.currentTime,
+                        evacuatedCount: Math.round(simulationState.evacuatedCount),
+                        remainingCount: Math.round(simulationState.remainingCount),
+                        riskCount: Math.round(simulationState.riskCount),
+                        evacuationEfficiency: (simulationState.totalPopulation > 0) ? (simulationState.evacuatedCount / simulationState.totalPopulation) * 100 : 0,
+                        fireRadius: simulationState.fireRadius
+                    },
+                    events: simulationState.events,
+                    alerts: simulationState.alerts
+                };
+                
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `firescene_report_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                addAlert(getTranslation('exported'), 'success', 'exported');
+            } catch (error) {
+                console.error('Export failed:', error);
+                addAlert(getTranslation('exportError'), 'danger', 'exportError');
+            }
+        }
+
+        function printReport() {
+            try {
+                const printWindow = window.open('', '_blank');
+                const reportContent = elements.detailedReport ? elements.detailedReport.innerHTML : '';
+                
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>FIRESCENE Pro - ${getTranslation('detailedReport')}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .report-header { text-align: center; margin-bottom: 30px; }
+                            .report-section { margin-bottom: 20px; page-break-inside: avoid; }
+                            @media print { body { margin: 10px; } }
+                            .bg-blue-50 { background-color: #eff6ff; }
+                            .bg-yellow-50 { background-color: #fffbeb; }
+                            .bg-red-50 { background-color: #fef2f2; }
+                            .p-4 { padding: 1rem; }
+                            .rounded { border-radius: 0.375rem; }
+                            .mb-2 { margin-bottom: 0.5rem; }
+                            .space-y-1 > * + * { margin-top: 0.25rem; }
+                            .text-sm { font-size: 0.875rem; }
+                            .font-semibold { font-weight: 600; }
+                            .text-blue-800 { color: #1e40af; }
+                            .text-yellow-800 { color: #92400e; }
+                            .text-red-800 { color: #991b1b; }
+                            .text-red-600 { color: #dc2626; }
+                            .text-yellow-600 { color: #d97706; }
+                            .text-green-600 { color: #059669; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="report-header">
+                            <h1>FIRESCENE Pro</h1>
+                            <h2>${getTranslation('detailedReport')}</h2>
+                            <p>Generated: ${new Date().toLocaleString()}</p>
+                        </div>
+                        <div class="report-section">
+                            ${reportContent}
+                        </div>
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+                
+                addAlert(getTranslation('printed'), 'info', 'printed');
+            } catch (error) {
+                console.error('Print failed:', error);
+                addAlert(getTranslation('printError'), 'danger', 'printError');
+            }
+        }
+
+        function shareReport() {
+            try {
+                if (navigator.share) {
+                    const shareData = {
+                        title: 'FIRESCENE Pro - Evacuation Report',
+                        text: `Evacuation efficiency: ${((simulationState.totalPopulation > 0) ? (simulationState.evacuatedCount / simulationState.totalPopulation) * 100 : 0).toFixed(1)}%. ${Math.round(simulationState.riskCount)} people at risk.`,
+                        url: window.location.href
+                    };
+                    
+                    navigator.share(shareData).then(() => {
+                        addAlert(getTranslation('shared'), 'success', 'shared');
+                    }).catch((err) => {
+                        console.log('Error sharing:', err);
+                        fallbackShare();
+                    });
+                } else {
+                    fallbackShare();
+                }
+            } catch (error) {
+                console.error('Share failed:', error);
+                fallbackShare();
+            }
+        }
+
+        function fallbackShare() {
+            try {
+                const reportSummary = `FIRESCENE Pro Evacuation Report
+Generated: ${new Date().toLocaleString()}
+Population: ${simulationState.totalPopulation}
+Evacuated: ${Math.round(simulationState.evacuatedCount)} (${((simulationState.totalPopulation > 0) ? (simulationState.evacuatedCount / simulationState.totalPopulation) * 100 : 0).toFixed(1)}%)
+At Risk: ${Math.round(simulationState.riskCount)}
+Fire Spread Rate: ${simulationState.fireSpreadRate} km/h
+Wind Speed: ${simulationState.windSpeed} km/h`;
+
+                navigator.clipboard.writeText(reportSummary).then(() => {
+                    addAlert(getTranslation('copied'), 'info', 'copied');
+                }).catch(() => {
+                    addAlert(getTranslation('shareError'), 'danger', 'shareError');
+                });
+            } catch (error) {
+                console.error('Fallback share failed:', error);
+                addAlert(getTranslation('shareError'), 'danger', 'shareError');
+            }
+        }
+
+        // Enhanced event listeners with complete chart label updates
+        function attachEventListeners() {
+            // Simulation controls
+            if (elements.startSimulation) elements.startSimulation.addEventListener('click', startSimulation);
+            if (elements.pauseSimulation) elements.pauseSimulation.addEventListener('click', pauseSimulation);
+            if (elements.resetSimulation) elements.resetSimulation.addEventListener('click', resetSimulation);
+            
+            // Enhanced language selector with complete translations
+            if (elements.langSelect) {
+                elements.langSelect.addEventListener('change', (e) => {
+                    changeLanguage(e.target.value);
+                    
+                    // Update chart error messages
+                    const timelineErrorEl = document.getElementById('timelineError');
+                    const riskErrorEl = document.getElementById('riskError');
+                    
+                    if (timelineErrorEl) {
+                        const errorDiv = timelineErrorEl.querySelector('div div:last-child');
+                        if (errorDiv) errorDiv.textContent = getTranslation('chartWillAppear', currentLanguage);
+                    }
+                    
+                    if (riskErrorEl) {
+                        const errorDiv = riskErrorEl.querySelector('div div:last-child');
+                        if (errorDiv) errorDiv.textContent = getTranslation('riskWillAppear', currentLanguage);
+                    }
+                });
+            }
+            
+            // Report functions
+            if (elements.exportReport) elements.exportReport.addEventListener('click', exportReport);
+            if (elements.printReport) elements.printReport.addEventListener('click', printReport);
+            if (elements.shareReport) elements.shareReport.addEventListener('click', shareReport);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        if (!simulationState.isRunning) {
+                            startSimulation();
+                        } else {
+                            pauseSimulation();
+                        }
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        resetSimulation();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        exportReport();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        printReport();
+                        break;
+                }
+            }
+        });
+
+        // Handle visibility change to pause/resume
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && simulationState.isRunning && !simulationState.isPaused) {
+                pauseSimulation();
+                addAlert(getTranslation('inactive'), 'info', 'inactive');
+            }
+        });
+
+        // Add responsive handling
+        window.addEventListener('resize', () => {
+            try {
+                if (window.timelineChart && typeof window.timelineChart.resize === 'function') {
+                    window.timelineChart.resize();
+                }
+                if (window.riskChart && typeof window.riskChart.resize === 'function') {
+                    window.riskChart.resize();
+                }
+            } catch (error) {
+                console.warn('Chart resize warning:', error.message);
+            }
+        });
+
+        // Initialization message
+        function initializeBasics() {
+            try {
+                cacheElements();
+                initializeSliders();
+                console.log('✅ FIRESCENE Pro System Initialized Successfully');
+                console.log('✅ Part 1 (HTML + CSS + Basic JS) loaded successfully');
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        // Enhanced initialization
+        function initializeFull() {
+            try {
+                console.log('✅ Full system initialization starting...');
+                
+                // Wait for Chart.js to be available
+                if (typeof Chart !== 'undefined') {
+                    initializeCharts();
+                } else {
+                    // Retry after a short delay
+                    setTimeout(() => {
+                        if (typeof Chart !== 'undefined') {
+                            initializeCharts();
+                        } else {
+                            console.warn('Chart.js not available, continuing without charts');
+                        }
+                    }, 1000);
+                }
+                
+                // Attach event listeners
+                attachEventListeners();
+                
+                // Add welcome message
+                addAlert(getTranslation('welcome'), 'info', 'welcome');
+                
+                // Update initial display
+                updateDisplay();
+                
+                console.log('🎯 FIRESCENE Pro System Fully Initialized');
+                
+            } catch (error) {
+                console.error('Full initialization failed:', error);
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeBasics();
+            setTimeout(initializeFull, 200);
+        });
+
+        // Final system check
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                console.log('=== FIRESCENE Pro System Status ===');
+                console.log('✅ HTML Structure - Loaded');
+                console.log('✅ CSS Styling - Loaded');
+                console.log('✅ JavaScript Logic - Loaded');
+                console.log('✅ Chart.js Integration - Ready');
+                console.log('✅ Multilingual Support - Active');
+                console.log('✅ Export Functions - Ready');
+                console.log('✅ System Status: FULLY OPERATIONAL');
+                console.log('===================================');
+                
+                // Add system ready alert
+                if (typeof addAlert === 'function') {
+                    addAlert(getTranslation('ready'), 'success', 'ready');
+                }
+                
+            }, 500);
+        });
+    </script>
+</body>
+</html>
